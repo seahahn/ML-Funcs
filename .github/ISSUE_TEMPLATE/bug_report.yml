@@ -2,7 +2,6 @@ name: bug_report
 description: 버그 발생 시 기록을 위한 템플릿
 title: "[BUG] 이슈제목"
 labels: ["분류: 버그"]
-projects: ["Phase 1(MLML) Progress Board", "WebApp Board", "Backend Board"]
 body:
   - type: markdown
     attributes:
