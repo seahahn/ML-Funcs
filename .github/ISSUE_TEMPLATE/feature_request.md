@@ -2,7 +2,7 @@
 name: feature_request
 about: 기능 추가 또는 요청을 위한 템플릿
 title: "[FeatureReq] 이슈제목"
-labels: documentation, enhancement, help wanted
+labels: ''
 assignees: seahahn
 
 ---

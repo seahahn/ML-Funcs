@@ -2,7 +2,7 @@
 name: bug_report
 about: 버그 발생 시 기록을 위한 템플릿
 title: "[BUG] 이슈제목"
-labels: bug
+labels: ''
 assignees: ''
 
 ---
