@@ -1,11 +1,8 @@
-※ '기능 구현 완료' or '문서화' 경우에 맞는 양식 사용하시면 됩니다.  
-※ 각 양식 상단에 안내드린 값에 맞춰 Pull Request 제목과 우측 Label 등 지정해주세요.  
+※ 상단에 안내드린 값에 맞춰 Pull Request 제목과 우측 Label 등 지정해주세요.  
 ※ 작성 시 **굵게 표시한 것**과 _기울임_ 한 것은 지우셔도 괜찮습니다.
 
 ---
-_name: feature_made  
-about: 기능 구현 완료 후 Pull Request 작성 시 사용할 Template  
-title: "[FeatureMade] 제목"  
+_title: "[FeatureMade] 제목"  
 labels: ["분류: 기능 구현"]  
 assignees: 'seahahn'_
 
@@ -25,24 +22,5 @@ ex. 인풋 : JSON으로 변환된 데이터프레임
 아웃풋 : 함수 연산을 거친 후 JSON으로 변환된 데이터프레임_
 
 ### 3. 추가 내용 (optional)
-_위 사항들 외 별도로 남기실 내용을 작성해주세요.  
-(텍스트 외 스크린샷 등의 이미지 첨부 가능)_
-
----
-_name: documentation  
-about: 문서 내용 추가 또는 수정 시 사용할 Pull Request Template  
-title: "[DOCU] 제목"  
-labels: ["분류: 문서화"]  
-assignees: 'seahahn'_
-
-**※ 문서 내용 추가 또는 수정을 한 경우 작성하기**
-
-### 작성자
-_여기에_이름을_남겨주세요_
-
-### 1. 문서화 내용
-_어떤 내용을 추가 또는 수정하셨는지 간략히 남겨주세요._
-
-### 2. 추가 내용 (optional)
 _위 사항들 외 별도로 남기실 내용을 작성해주세요.  
 (텍스트 외 스크린샷 등의 이미지 첨부 가능)_
