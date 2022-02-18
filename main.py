@@ -1,10 +1,6 @@
 from typing import Optional
 from fastapi import FastAPI, Request
 
-# modin을 쓰기 위한 ray initialize
-import ray
-ray.init()
-
 app = FastAPI()
 
 @app.get("/")

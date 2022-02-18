@@ -17,5 +17,8 @@ pip install fastapi uvicorn[standard]
 ## 실행
 
 ```
+export MODIN_ENGINE=ray   # Modin will use Ray
+export MODIN_ENGINE=dask  # Modin will use Dask
+
 uvicorn main:app --reload
 ```
