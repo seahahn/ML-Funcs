@@ -1,0 +1,7 @@
+numpy
+modin[all]
+sklearn
+bokeh
+fastapi uvicorn[standard]
+python-multipart
+openpyxl
