@@ -1,16 +1,11 @@
 from typing import Optional
+from fastapi import FastAPI, Request
 
-from fastapi import FastAPI
-from pydantic import BaseModel
+# modin을 쓰기 위한 ray initialize
+import ray
+ray.init()
 
 app = FastAPI()
-
-
-class Item(BaseModel):
-    name: str
-    price: float
-    is_offer: Optional[bool] = None
-
 
 @app.get("/")
 def read_root():
@@ -23,5 +18,10 @@ def read_item(item_id: int, q: Optional[str] = None):
 
 
 @app.put("/items/{item_id}")
-def update_item(item_id: int, item: Item):
-    return {"item_name": item.price, "item_id": item_id}
+def update_item(item_id: int, item: Request):
+    return {"item": item, "item_id": item_id}
+
+
+from functions import create_upload_file
+
+create_upload_file = app.post("/uploadfile/")(create_upload_file)
