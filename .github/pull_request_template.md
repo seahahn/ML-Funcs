@@ -4,7 +4,7 @@
 ---
 _title: "[FeatureMade] 제목"  
 labels: ["분류: 기능 구현"]  
-assignees: 'seahahn'_
+reviewer: 'seahahn'_
 
 **※ 이슈에 명시된 기능 구현 완료한 경우 작성하기**  
 **※ 구현한 기능이 명시된 Issue를 꼭! 연결시키기**  
