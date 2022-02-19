@@ -20,16 +20,27 @@ def update_item(item_id: int, item: Request):
 
 from functions import (
     create_upload_file, 
-    read_head, 
-    read_tail, 
-    read_shape,
-    read_dtype,
-    read_describe
+    get_head, 
+    get_tail, 
+    get_shape,
+    get_dtype,
+    get_columns,
+    get_unique,
+    get_unique_column,
+    get_na,
+    get_corr,
+    get_describe,
+    set_transpose
 )
 
-create_upload_file = app.post("/uploadfile")   (create_upload_file)
-read_head          = app.post("/file/head")    (read_head)
-read_tail          = app.post("/file/tail")    (read_tail)
-read_shape         = app.post("/file/shape")   (read_shape)
-read_dtype         = app.post("/file/dtype")   (read_dtype)
-read_describe      = app.post("/file/describe")(read_describe)
+create_upload_file = app.post("/uploadfile")          (create_upload_file)
+get_head          = app.post("/file/head")           (get_head)
+get_tail          = app.post("/file/tail")           (get_tail)
+get_shape         = app.post("/file/shape")          (get_shape)
+get_dtype         = app.post("/file/dtype")          (get_dtype)
+get_columns       = app.post("/file/columns")        (get_columns)
+get_unique        = app.post("/file/unique")         (get_unique)
+get_unique_column = app.post("/file/unique/{column}")(get_unique_column)
+get_na            = app.post("/file/isna")           (get_na)
+get_corr          = app.post("/file/corr")           (get_corr)
+get_describe      = app.post("/file/describe")       (get_describe)
