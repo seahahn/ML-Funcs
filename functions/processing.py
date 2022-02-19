@@ -51,6 +51,7 @@ async def set_groupby(
 
     ## func
     func_list = ["sum", "count", "mean", "min", "max", "std", "median", "size"]
+    func = func.lower()
     if not func in func_list:
         return f'"{func}" is invalid function. "func" should be in {func_list}'
     
@@ -174,6 +175,7 @@ async def set_drop(
     ```
     """
     ## errors
+    errors = errors.lower()
     if errors not in ["raise", "ignore"]:
         return f'"errors" should be "raise" or "ignore". current errors = {errors}'
 
@@ -253,6 +255,7 @@ async def set_dropna(
         return '"axis" should be 0, 1. row(0), column(1)'
     
     ## how
+    how = how.lower()
     if how not in ["any", "all"]:
         return f'"how" should be "any" or "all". current how = {how}'
 
@@ -346,6 +349,7 @@ async def set_rename(
         return '"copy" should be bool, "true" or "false"'
 
     ## errors
+    errors = errors.lower()
     if errors not in ["raise", "ignore"]:
         return f'"errors" should be "raise" or "ignore". current errors = {errors}'
     
@@ -357,3 +361,93 @@ async def set_rename(
         copy   = copy,
         errors = errors,
     ).to_json()
+
+
+async def set_sort_values(
+    item:    Request,
+    by:      str,
+    *,
+    axis:    Optional[str] = Query(0,           max_length=50),
+    ascd:    Optional[str] = Query("true",      max_length=50),
+    kind:    Optional[str] = Query("quicksort", max_length=50),
+    na_pos:  Optional[str] = Query("last",      max_length=50),
+    ig_idx:  Optional[str] = Query("false",     max_length=50),
+    key:     Optional[str] = Query(None,        max_length=50),
+    # inplace: Optional[str] = Query("false",     max_length=50), # inplace is not needed in this way
+) -> str:
+    """
+    ```python
+    pandas.DataFrame.sort_value(by) #의 결과를 리턴하는 함수
+    ```
+
+    Args:
+    ```
+    item   (Request, required): JSON
+    by     (str,     required): "by" should be string array(column names) divied by ","
+    *
+    axis   (str,     optional): Default 0,           0: row, 1: column
+    ascd   (str,     optional): Default "true",      true: 오름차순, false: 내림차순
+    kind   (str,     optional): Default "quicksort", 정렬방법 "quicksort", "mergesort", "heapsort", "stable"
+    na_pos (str,     optional): Default "last",      정렬시 결측치 위치 "first"는 앞부분 or "last"는 뒷부분 ascd에 영향을 안 받음.
+    ig_idx (str,     optional): Default "false",     false면 인덱스 유지, true면 정렬 후 인덱스를 0부터 새로 붙임
+    key    (str,     optional): Default None,        키 callable이라 일단 구현 보류
+
+    Returns:
+    ```
+    str: JSON
+    ```
+    """
+    df = pd.read_json(await item.json())
+
+    ## by
+    try:
+        by = by.split(",")
+        error_list = [i for i in by if i not in df.columns]
+        if error_list:
+            return f'"by" should be string array(column names) divied by ","\nlist not in DataFrame columns: {error_list}'
+    except:
+        return '"by" should be string array(column names) divied by ","'
+    
+    ## ascd: ascending
+    try:
+        if   ascd.lower() == "true" : ascd = True
+        elif ascd.lower() == "false": ascd = False
+    except:
+        return '"ascd: ascending" should be bool, "true" or "false"'
+
+    ## kind
+    kind = kind.lower()
+    if kind not in ["quicksort", "mergesort", "heapsort", "stable"]:
+        return f'"kind" should be ["quicksort", "mergesort", "heapsort", "stable"]. current kind = {kind}'
+
+    ## na_pos: na_position
+    na_pos = na_pos.lower()
+    if na_pos not in ["first", "last"]:
+        return f'"na_pos: na_position" should be "first" or "last". current na_pos: na_pos = {na_pos}'    
+
+    ## ig_idx: ignore_index
+    try:
+        if   ig_idx.lower() == "true" : ig_idx = True
+        elif ig_idx.lower() == "false": ig_idx = False
+    except:
+        return '"ig_idx: ignore_index" should be bool, "true" or "false"'
+    
+    ## key => sorted 함수의 key와 동일. 함수를 넣어야 해서 일단 구현 보류
+    # callable, optional
+    # If not None, apply the key function to the series values
+    # before sorting. This is similar to the `key` argument in the
+    # builtin :meth:`sorted` function, with the notable difference that
+    # this `key` function should be *vectorized*. It should expect a
+    # ``Series`` and return an array-like.
+    df.sort_index
+    print(df.sort_values(
+        by           = by,
+        axis         = axis,
+        ascending    = ascd,
+        kind         = kind,
+        na_position  = na_pos,
+        ignore_index = ig_idx,
+        key          = key, # 현재 미구현
+        # inplace      = inplace,
+    )
+    )

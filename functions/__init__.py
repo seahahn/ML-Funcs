@@ -17,7 +17,8 @@ from functions.processing import (
     set_groupby,
     set_drop,
     set_dropna,
-    set_rename
+    set_rename,
+    set_sort_values
 )
 
 __all__ = [
@@ -36,5 +37,6 @@ __all__ = [
     "set_groupby",
     "set_drop",
     "set_dropna",
-    "set_rename"
+    "set_rename",
+    "set_sort_values"
 ]
