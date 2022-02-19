@@ -43,7 +43,7 @@ async def get_unique_column(column: str, item: Request) -> str:
     # df.to_json()
     # print(type(df.PassengerId[0]))
     if column not in df.columns:
-        return json.dumps(f"{column} is not in columns of DataFrame. It should be in {list(df.columns)}")
+        return f"{column} is not in columns of DataFrame. It should be in {list(df.columns)}"
     
     return f"{list(df[column].unique())}"
 
@@ -64,13 +64,9 @@ async def get_na(item: Request, *, sum: Optional[str] = Query("false", max_lengt
     (str): JSON
     ```
     """
-    if sum.lower() == "true" : return pd.read_json(await item.json()).isna().sum().to_json()
-    elif sum.lower == "false": return pd.read_json(await item.json()).isna().to_json()
-    else                     : return "sum은 true or false를 넣으셔야 합니다."
-
-
-async def set_transpose(item:Request) -> str:
-    return pd.read_json(await item.json()).transpose().to_json()
+    if   sum.lower() == "true" : return pd.read_json(await item.json()).isna().sum().to_json()
+    elif sum.lower() == "false": return pd.read_json(await item.json()).isna().to_json()
+    else                       : return "sum은 true or false를 넣으셔야 합니다."
 
 
 async def get_corr(
@@ -104,16 +100,17 @@ async def get_corr(
     ```
     """
     if not method in ["pearson", "kendall", "spearman"]:
-        return json.dumps('method should be in ["pearson", "kendall", "spearman"]')
+        return 'method should be in ["pearson", "kendall", "spearman"]'
+    
     try   : req_min = int(req_min)
-    except: return json.dumps("req_min should be positive integer")
+    except: return "req_min should be positive integer"
     
     df = pd.read_json(await item.json())
-    cols = df.columns
+    cols = list(df.columns)
     if col1 and col1 not in cols:
-        return json.dumps(f"{col1} is not in columns of DataFrame. It should be in {cols}")
+        return f"{col1} is not in columns of DataFrame. It should be in {cols}"
     if col2 and col2 not in cols:
-        return json.dumps(f"{col2} is not in columns of DataFrame. It should be in {cols}")
+        return f"{col2} is not in columns of DataFrame. It should be in {cols}"
     
     if col1 and col2:
         return json.dumps(df[col1].corr(

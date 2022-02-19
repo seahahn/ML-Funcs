@@ -1,5 +1,5 @@
 from functions.data2json import create_upload_file
-from functions.dataprocessing import (
+from functions.eda import (
     get_head, 
     get_tail, 
     get_shape,
@@ -10,6 +10,9 @@ from functions.dataprocessing import (
     get_na,
     get_corr,
     get_describe,
+    
+)
+from functions.processing import (
     set_transpose
 )
 
