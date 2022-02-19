@@ -3,21 +3,6 @@ from fastapi import FastAPI, Request
 
 app = FastAPI()
 
-@app.get("/")
-def read_root():
-    return {"Hello": "World"}
-
-
-@app.get("/items/{item_id}")
-def read_item(item_id: int, q: Optional[str] = None):
-    return {"item_id": item_id, "q": q}
-
-
-@app.put("/items/{item_id}")
-def update_item(item_id: int, item: Request):
-    return {"item": item, "item_id": item_id}
-
-
 from functions import (
     create_upload_file, 
     get_head, 
@@ -32,7 +17,8 @@ from functions import (
     get_describe,
     set_transpose,
     set_groupby,
-    set_drop
+    set_drop,
+    set_dropna
 )
 
 create_upload_file = app.post("/uploadfile")          (create_upload_file)
@@ -49,3 +35,4 @@ get_describe       = app.post("/file/describe")       (get_describe)
 set_transpose      = app.post("/file/transpose")      (set_transpose)
 set_groupby        = app.post("/file/groupby/{func}") (set_groupby)
 set_drop           = app.post("/file/drop")           (set_drop)
+set_dropna         = app.post("/file/dropna")         (set_dropna)

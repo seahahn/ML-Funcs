@@ -148,7 +148,7 @@ async def set_drop(
     *,
     axis:    Optional[str] = Query(0,       max_length=50),
     errors:  Optional[str] = Query("raise", max_length=50),
-    # index:   Optional[str] = Query(None,    max_length=50), if axis = 0 : index = labels
+    # index:   Optional[str] = Query(None,    max_length=50), if   axis = 0 : index = labels
     # columns: Optional[str] = Query(None,    max_length=50), elif axis = 1 : columns = labels
     # level:   Optional[str] = Query(None,    max_length=50), # level is for multi-index
     # inplace: Optional[str] = Query(False,   max_length=50), # inplace is not need this way
@@ -157,6 +157,8 @@ async def set_drop(
     ```
     labels는 반드시 존재하는 컬럼 or 인덱스명을 쉼표로 구분해서 입력해야 한다. 1개만 입력할 경우 쉽표 X
     axis = 0(row), 1(columns)
+
+    ※ 추후 level 구현 예정
     ```
     Args:
     ```
@@ -173,7 +175,7 @@ async def set_drop(
     """
     ## errors
     if errors not in ["raise", "ignore"]:
-        return f'"errors" should be "raise" or "ignore". errors = {errors}'
+        return f'"errors" should be "raise" or "ignore". current errors = {errors}'
 
     df = pd.read_json(await item.json())
 
@@ -216,3 +218,72 @@ async def set_drop(
         # level=None,
         # inplace=False,
     ).to_json()
+
+
+async def set_dropna(
+    item:    Request,
+    *,
+    axis:    Optional[str] = Query(0,       max_length=50),
+    how:     Optional[str] = Query('any',   max_length=50), # or 'all'
+    thresh:  Optional[str] = Query(None,    max_length=50),
+    subset:  Optional[str] = Query(None,    max_length=50),
+    # inplace: Optional[str] = Query("false", max_length=50), # inplace is not need in this way
+) -> str:
+    """pandas.DataFrame.dropna() 를 리턴하는 함수
+
+    Args:
+        item  (Request, required): JSON
+        *
+        axis  (str,     optional): Default: 0,     0(row), 1(column)
+        how   (str,     optional): Default: 'any', 'any': na 하나라도 있으면 드랍, 'all':전부 na면 드랍
+        thresh(str,     optional): Default: None,  thresh 수 이하의 데이터가 있는 컬럼 드랍
+        subset(str,     optional): Default: None,  해당 column에서 na인 row를 drop하기 위해 씀
+
+    Returns:
+        str: JSON
+    """
+    ## axis
+    try:
+        axis = int(axis)
+        if axis not in [0, 1]: return '"axis" should be 0, 1. row(0), column(1)'
+    except:
+        return '"axis" should be 0, 1. row(0), column(1)'
+    
+    ## how
+    if how not in ["any", "all"]:
+        return f'"how" should be "any" or "all". current how = {how}'
+
+    ## thresh => threshold: 최소 thresh 만큼 데이터가 없으면 드랍
+    # int, optional
+    # Require that many non-NA values.
+    if thresh is not None:
+        try:
+            thresh = int(thresh)
+            if thresh <= 0: return f'"thresh" should be positive integer. current thresh = {thresh}'
+        except:
+            return f'"thresh" should be positive integer. current thresh = {thresh}'
+
+    df = pd.read_json(await item.json())
+
+    ## subset => dropna를 하면서 삭제하고 싶은 컬럼을 적으면 된다.
+    # column label or sequence of labels, optional
+    # Labels along other axis to consider, e.g. if you are dropping rows
+    # these would be a list of columns to include.
+    if subset is not None:
+        try:
+            subset = subset.split(",")
+            error_list = [i for i in subset if i not in df.columns]
+            if error_list:
+                return f'"subset" should be string array(column names) divied by ",". list not in DataFrame columns: {error_list}'
+        except:
+            return f'"subset" should be string array(column names) divied by ",". current subset = {subset}'
+
+    return df.dropna(
+        axis    = axis,
+        how     = how,
+        thresh  = thresh,
+        subset  = subset,
+        # inplace = False,
+    )
+
+

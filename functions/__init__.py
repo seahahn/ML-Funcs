@@ -15,7 +15,8 @@ from functions.eda import (
 from functions.processing import (
     set_transpose,
     set_groupby,
-    set_drop
+    set_drop,
+    set_dropna
 )
 
 __all__ = [
@@ -31,5 +32,7 @@ __all__ = [
     "get_corr",
     "get_describe",
     "set_transpose",
-    "set_groupby"
+    "set_groupby",
+    "set_drop",
+    "set_dropna"
 ]
