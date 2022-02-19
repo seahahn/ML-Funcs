@@ -439,8 +439,8 @@ async def set_sort_values(
     # builtin :meth:`sorted` function, with the notable difference that
     # this `key` function should be *vectorized*. It should expect a
     # ``Series`` and return an array-like.
-    df.sort_index
-    print(df.sort_values(
+    
+    return df.sort_values(
         by           = by,
         axis         = axis,
         ascending    = ascd,
@@ -449,5 +449,4 @@ async def set_sort_values(
         ignore_index = ig_idx,
         key          = key, # 현재 미구현
         # inplace      = inplace,
-    )
-    )
+    ).to_json()
