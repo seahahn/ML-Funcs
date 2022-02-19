@@ -32,7 +32,10 @@ async def get_columns(item: Request) -> str:
 
 async def get_unique(item: Request) -> str:
     """입력이 Series의 JSON일 경우"""
-    return f"{list(pd.read_json(await item.json()).unique())}"
+    try:
+        return f"{list(pd.read_json(await item.json()).unique())}"
+    except:
+        return "input JSON should be converted to pandas.Series"
 
 
 async def get_unique_column(column: str, item: Request) -> str:
@@ -40,12 +43,12 @@ async def get_unique_column(column: str, item: Request) -> str:
 
     /file/unique/컬럼명 에서 컬럼명이 DataFrame에 없을 경우 에러메시지를 리턴한다."""
     df = pd.read_json(await item.json())
-    # df.to_json()
-    # print(type(df.PassengerId[0]))
-    if column not in df.columns:
-        return f"{column} is not in columns of DataFrame. It should be in {list(df.columns)}"
-    
-    return f"{list(df[column].unique())}"
+    try:
+        if column not in df.columns:
+            return f"{column} is not in columns of DataFrame. It should be in {list(df.columns)}"
+        return f"{list(df[column].unique())}"
+    except:
+        return "input JSON should be converted to pandas.DataFrame"
 
 
 async def get_na(item: Request, *, sum: Optional[str] = Query("false", max_length=50)) -> str:
