@@ -147,11 +147,11 @@ async def set_drop(
     labels:  str,
     *,
     axis:    Optional[str] = Query(0,       max_length=50),
-    errors:  Optional[str] = Query("raise", max_length=50),
-    # index:   Optional[str] = Query(None,    max_length=50), if   axis = 0 : index = labels
-    # columns: Optional[str] = Query(None,    max_length=50), elif axis = 1 : columns = labels
+    errors:  Optional[str] = Query("raise", max_length=50), # or "ignore"
+    # index:   Optional[str] = Query(None,    max_length=50), # if   axis = 0 : index = labels
+    # columns: Optional[str] = Query(None,    max_length=50), # elif axis = 1 : columns = labels
     # level:   Optional[str] = Query(None,    max_length=50), # level is for multi-index
-    # inplace: Optional[str] = Query(False,   max_length=50), # inplace is not need this way
+    # inplace: Optional[str] = Query(False,   max_length=50), # inplace is not needed this way
 ) -> str:
     """pandas.DataFrame.drop(labels) 를 리턴하는 함수
     ```
@@ -227,7 +227,7 @@ async def set_dropna(
     how:     Optional[str] = Query('any',   max_length=50), # or 'all'
     thresh:  Optional[str] = Query(None,    max_length=50),
     subset:  Optional[str] = Query(None,    max_length=50),
-    # inplace: Optional[str] = Query("false", max_length=50), # inplace is not need in this way
+    # inplace: Optional[str] = Query("false", max_length=50), # inplace is not needed in this way
 ) -> str:
     """pandas.DataFrame.dropna() 를 리턴하는 함수
 
@@ -289,3 +289,71 @@ async def set_dropna(
         # inplace = False,
     ).to_json()
 
+
+async def set_rename(
+    item:    Request,
+    # mapper:  str, # it should be dict so it is seperated key and value
+    keys:    str,
+    values:  str,
+    *,
+    copy:    Optional[str] = Query("true",   max_length=50),
+    errors:  Optional[str] = Query("ignore", max_length=50), # or "raise"
+    # axis:    Optional[str] = Query(1,        max_length=50), # It's not needed. We'll only change column names
+    # index:   Optional[str] = Query(None,     max_length=50), # if   axis = 0 : index = mapper
+    # columns: Optional[str] = Query(None,     max_length=50), # elif axis = 1 : columns = mapper
+    # inplace: Optional[str] = Query("false",  max_length=50), # inplace is not needed in this way
+    # level:   Optional[str] = Query(None,     max_length=50), # level is for multi-index
+) -> str:
+    """pandas.DataFrame.rename() 을 리턴하는 함수
+
+    Args:
+        item   (Request, required): JSON
+        keys   (str,     required): "keys" should be string array(column names) divied by ","
+        values (str,     required): "values" should be string array(new column names) divied by ","
+        *
+        copy   (str,     optional): Default "true",   ??? "Also copy underlying data"
+        errors (str,     optional): Default "ignore", "raise" 일 경우 keys에 없는 컬럼명이 있는 경우 에러 발생
+
+    Returns:
+        str: JSON
+    """
+    df = pd.read_json(await item.json())
+
+    ## keys
+    try:
+        keys = keys.split(",")
+        if errors == "raise":
+            error_list = [i for i in keys if i not in df.columns]
+            if error_list:
+                return f'"keys" should be string array(column names) divied by ",". list not in DataFrame columns: {error_list}'
+    except:
+        return f'"keys" should be string array(column names) divied by ",". current keys = {keys}'
+    
+    ## values
+    try:
+        values = values.split(",")
+    except:
+        return f'"values" should be string array(new column names) divied by ",". current values = {values}'
+    
+    if len(keys) != len(values):
+        return f'"keys" and "values" should be same length. current len(keys) = {len(keys)} != {len(values)} = len(values)'
+
+    ## copy
+    try:
+        if   copy.lower() == "true" : copy = True
+        elif copy.lower() == "false": copy = False
+    except:
+        return '"copy" should be bool, "true" or "false"'
+
+    ## errors
+    if errors not in ["raise", "ignore"]:
+        return f'"errors" should be "raise" or "ignore". current errors = {errors}'
+    
+    mapper = {keys[i]:values[i] for i in range(len(keys))}
+    
+    return df.rename(
+        mapper = mapper,
+        axis   = 1,
+        copy   = copy,
+        errors = errors,
+    ).to_json()

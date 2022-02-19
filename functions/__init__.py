@@ -16,7 +16,8 @@ from functions.processing import (
     set_transpose,
     set_groupby,
     set_drop,
-    set_dropna
+    set_dropna,
+    set_rename
 )
 
 __all__ = [
@@ -34,5 +35,6 @@ __all__ = [
     "set_transpose",
     "set_groupby",
     "set_drop",
-    "set_dropna"
+    "set_dropna",
+    "set_rename"
 ]
