@@ -54,7 +54,7 @@ async def get_unique_column(column: str, item: Request) -> str:
 async def get_na(item: Request, *, sum: Optional[str] = Query("false", max_length=50)) -> str:
     """결측치 확인 함수
     `/file/isna`
-    `/file/isna?sum=ture`
+    `/file/isna?sum=true`
 
     Args:
     ```
@@ -105,8 +105,12 @@ async def get_corr(
     if not method in ["pearson", "kendall", "spearman"]:
         return 'method should be in ["pearson", "kendall", "spearman"]'
     
-    try   : req_min = int(req_min)
-    except: return "req_min should be positive integer"
+    try   : 
+        req_min = int(req_min)
+        if req_min <= 0:
+            raise Exception
+    except: 
+        return "req_min should be positive integer"
     
     df = pd.read_json(await item.json())
     cols = list(df.columns)
