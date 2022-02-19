@@ -30,18 +30,22 @@ from functions import (
     get_na,
     get_corr,
     get_describe,
-    set_transpose
+    set_transpose,
+    set_groupby,
+    set_drop
 )
 
 create_upload_file = app.post("/uploadfile")          (create_upload_file)
-get_head          = app.post("/file/head")           (get_head)
-get_tail          = app.post("/file/tail")           (get_tail)
-get_shape         = app.post("/file/shape")          (get_shape)
-get_dtype         = app.post("/file/dtype")          (get_dtype)
-get_columns       = app.post("/file/columns")        (get_columns)
-get_unique        = app.post("/file/unique")         (get_unique)
-get_unique_column = app.post("/file/unique/{column}")(get_unique_column)
-get_na            = app.post("/file/isna")           (get_na)
-get_corr          = app.post("/file/corr")           (get_corr)
-get_describe      = app.post("/file/describe")       (get_describe)
-set_transpose     = app.post("/file/transpose")      (set_transpose)
+get_head           = app.post("/file/head")           (get_head)
+get_tail           = app.post("/file/tail")           (get_tail)
+get_shape          = app.post("/file/shape")          (get_shape)
+get_dtype          = app.post("/file/dtype")          (get_dtype)
+get_columns        = app.post("/file/columns")        (get_columns)
+get_unique         = app.post("/file/unique")         (get_unique)
+get_unique_column  = app.post("/file/unique/{column}")(get_unique_column)
+get_na             = app.post("/file/isna")           (get_na)
+get_corr           = app.post("/file/corr")           (get_corr)
+get_describe       = app.post("/file/describe")       (get_describe)
+set_transpose      = app.post("/file/transpose")      (set_transpose)
+set_groupby        = app.post("/file/groupby/{func}") (set_groupby)
+set_drop           = app.post("/file/drop")           (set_drop)
