@@ -232,15 +232,18 @@ async def set_dropna(
     """pandas.DataFrame.dropna() 를 리턴하는 함수
 
     Args:
-        item  (Request, required): JSON
-        *
-        axis  (str,     optional): Default: 0,     0(row), 1(column)
-        how   (str,     optional): Default: 'any', 'any': na 하나라도 있으면 드랍, 'all':전부 na면 드랍
-        thresh(str,     optional): Default: None,  thresh 수 이하의 데이터가 있는 컬럼 드랍
-        subset(str,     optional): Default: None,  해당 column에서 na인 row를 drop하기 위해 씀
-
+    ```
+    item  (Request, required): JSON
+    *
+    axis  (str,     optional): Default: 0,     0(row), 1(column)
+    how   (str,     optional): Default: 'any', 'any': na 하나라도 있으면 드랍, 'all':전부 na면 드랍
+    thresh(str,     optional): Default: None,  thresh 수 이하의 데이터가 있는 컬럼 드랍
+    subset(str,     optional): Default: None,  해당 column에서 na인 row를 drop하기 위해 씀
+    ```
     Returns:
-        str: JSON
+    ```
+    str: JSON
+    ```
     """
     ## axis
     try:
@@ -284,6 +287,5 @@ async def set_dropna(
         thresh  = thresh,
         subset  = subset,
         # inplace = False,
-    )
-
+    ).to_json()
 
