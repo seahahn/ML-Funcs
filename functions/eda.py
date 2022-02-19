@@ -188,15 +188,31 @@ async def get_describe(
 
 
     try:    percentiles = list(map(float,percentiles.split(","))) if percentiles else None
-    except: return json.dumps("percentiles should be 0~1 float string divided by ','")
-    try:    num = int(num)
-    except: return json.dumps("num should be -1, 0, 1")
-    try:    obj = int(obj)
-    except: return json.dumps("obj should be -1, 0, 1")
-    try:    cat = int(cat)
-    except: return json.dumps("cat should be -1, 0, 1")
-    try:    date = int(date)
-    except: return json.dumps("date should be -1, 0, 1")
+    except: return "percentiles should be 0~1 float string divided by ','"
+
+    try:
+        num = int(num)
+        if num not in [-1, 0, 1]:
+            return "num should be -1, 0, 1"
+    except: return "num should be -1, 0, 1"
+
+    try:    
+        obj = int(obj)
+        if obj not in [-1, 0, 1]:
+            return "obj should be -1, 0, 1"
+    except: return "obj should be -1, 0, 1"
+
+    try:
+        cat = int(cat)
+        if cat not in [-1, 0, 1]:
+            return "cat should be -1, 0, 1"
+    except: return "cat should be -1, 0, 1"
+
+    try:
+        date = int(date)
+        if date not in [-1, 0, 1]:
+            return "date should be -1, 0, 1"
+    except: return "date should be -1, 0, 1"
     """
     Pandas data type
     "int64"      # np.number

@@ -14,12 +14,12 @@ async def set_groupby(
     by:         str,
     *,
     axis:       Optional[str] = Query(0,     max_length=50),
-    # level:      Optional[str] = Query(None,  max_length=50), # MultiIndex 에서 사용하는 것! 
     as_index:   Optional[str] = Query("True",  max_length=50), 
     sort:       Optional[str] = Query("True",  max_length=50), 
     group_keys: Optional[str] = Query("True",  max_length=50), 
     observed:   Optional[str] = Query("False", max_length=50), 
     dropna:     Optional[str] = Query("True",  max_length=50)
+    # level:      Optional[str] = Query(None,  max_length=50), # MultiIndex 에서 사용하는 것! 
 ) -> str:
     """pandas.DataFrame.groupby(by).func() 결과를 리턴하는 함수
     ```
@@ -128,7 +128,7 @@ async def set_groupby(
         observed   = observed,
         dropna     = dropna
     )
-    df_group
+    
     functions = {
         "sum"   : df_group.sum,
         "count" : df_group.count,
@@ -139,7 +139,7 @@ async def set_groupby(
         "median": df_group.median,
         "size"  : df_group.size
     }
-    print(functions[func]())
+    
     return functions[func]().to_json()
 
 
@@ -210,7 +210,6 @@ async def set_drop(
     except:
         return '"labels" should be string array(column names) divied by ","'
     
-    print(df.drop(labels, axis, errors = errors))
     return df.drop(
         labels = labels,
         axis   = axis,
@@ -450,3 +449,4 @@ async def set_sort_values(
         key          = key, # 현재 미구현
         # inplace      = inplace,
     ).to_json()
+
