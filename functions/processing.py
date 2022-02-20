@@ -1,8 +1,15 @@
+from copy import copy
 from typing import Optional
-from fastapi import Request, Query
+from fastapi import Body, Request, Query
 import json
 import numpy as np
 import pandas as pd
+
+
+def boolean(x):
+    if   x.lower() == "true" : return True
+    elif x.lower() == "false": return False
+
 
 async def set_transpose(item: Request) -> str:
     return pd.read_json(await item.json()).transpose().to_json()
@@ -79,42 +86,27 @@ async def set_groupby(
     # If the axis is a MultiIndex (hierarchical), group by a particular level or levels.
 
     ## as_index
-    try:
-        if   as_index.lower() == "true" : as_index = True
-        elif as_index.lower() == "false": as_index = False
-    except:
-        return '"as_index" should be bool, "true" or "false"'
+    as_index = boolean(as_index)
+    if as_index is None: return '"as_index" should be bool, "true" or "false"'
 
     ## sort
-    try:
-        if   sort.lower() == "true" : sort = True
-        elif sort.lower() == "false": sort = False
-    except:
-        return '"sort" should be bool, "true" or "false"'
+    sort = boolean(sort)
+    if sort is None: return '"sort" should be bool, "true" or "false"'
     
     ## group_keys
-    try:
-        if   group_keys.lower() == "true" : group_keys = True
-        elif group_keys.lower() == "false": group_keys = False
-    except:
-        return '"group_keys" should be bool, "true" or "false"'
+    group_keys = boolean(group_keys)
+    if group_keys is None: return '"group_keys" should be bool, "true" or "false"'
 
     ## squeeze(미구현)
     # squeeze will deprecated in future version
 
     ## observed
-    try:
-        if   observed.lower() == "true" : observed = True
-        elif observed.lower() == "false": observed = False
-    except:
-        return '"observed" should be bool, "true" or "false"'
+    observed = boolean(observed)
+    if observed is None: return '"observed" should be bool, "true" or "false"'
 
     ## dropna
-    try:
-        if   dropna.lower() == "true" : dropna = True
-        elif dropna.lower() == "false": dropna = False
-    except:
-        return '"dropna" should be bool, "true" or "false"'
+    dropna = boolean(dropna)
+    if dropna is None: return '"dropna" should be bool, "true" or "false"'
 
 
     # pd.DataFrame.groupby
@@ -341,11 +333,8 @@ async def set_rename(
         return f'"keys" and "values" should be same length. current len(keys) = {len(keys)} != {len(values)} = len(values)'
 
     ## copy
-    try:
-        if   copy.lower() == "true" : copy = True
-        elif copy.lower() == "false": copy = False
-    except:
-        return '"copy" should be bool, "true" or "false"'
+    copy = boolean(copy)
+    if copy is None: return '"copy" should be bool, "true" or "false"'
 
     ## errors
     errors = errors.lower()
@@ -408,11 +397,8 @@ async def set_sort_values(
         return '"by" should be string array(column names) divied by ","'
     
     ## ascd: ascending
-    try:
-        if   ascd.lower() == "true" : ascd = True
-        elif ascd.lower() == "false": ascd = False
-    except:
-        return '"ascd: ascending" should be bool, "true" or "false"'
+    ascd = boolean(ascd)
+    if ascd is None: return '"ascd: ascending" should be bool, "true" or "false"'
 
     ## kind
     kind = kind.lower()
@@ -425,11 +411,8 @@ async def set_sort_values(
         return f'"na_pos: na_position" should be "first" or "last". current na_pos: na_pos = {na_pos}'    
 
     ## ig_idx: ignore_index
-    try:
-        if   ig_idx.lower() == "true" : ig_idx = True
-        elif ig_idx.lower() == "false": ig_idx = False
-    except:
-        return '"ig_idx: ignore_index" should be bool, "true" or "false"'
+    ig_idx = boolean(ig_idx)
+    if ig_idx is None: return '"ig_idx: ignore_index" should be bool, "true" or "false"'
     
     ## key => sorted 함수의 key와 동일. 함수를 넣어야 해서 일단 구현 보류
     # callable, optional
@@ -450,3 +433,258 @@ async def set_sort_values(
         # inplace      = inplace,
     ).to_json()
 
+
+async def set_merge(
+    item:        Request, 
+    # item2:       Request,
+    *,
+    how:         Optional[str] = Query("inner",     max_length=50),
+    on:          Optional[str] = Query(None,        max_length=50),
+    left_on:     Optional[str] = Query(None,        max_length=50),
+    right_on:    Optional[str] = Query(None,        max_length=50),
+    left_index:  Optional[str] = Query("false",     max_length=50),
+    right_index: Optional[str] = Query("false",     max_length=50),
+    sort:        Optional[str] = Query("false",     max_length=50),
+    # suffixes:    Optional[str] = Query(("_x","_y"), max_length=50),
+    left_suf:    Optional[str] = Query("_x",        max_length=50),
+    right_suf:   Optional[str] = Query("_y",        max_length=50),
+    copy:        Optional[str] = Query("true",      max_length=50),
+    indicator:   Optional[str] = Query("false",     max_length=50),
+    validate:    Optional[str] = Query(None,        max_length=50),
+) -> str:
+    """
+    ```python
+    pandas.DataFrame.merge(pandas.DataFrame) # 의 결과를 리턴하는 함수
+    ```
+    Args:
+    ```
+    item        (Request, required): JSON
+    *
+    how         (str,     optional): Default "inner", 
+    on          (str,     optional): Default None,    
+    left_on     (str,     optional): Default None,    
+    right_on    (str,     optional): Default None,    
+    left_index  (str,     optional): Default "false", 
+    right_index (str,     optional): Default "false", 
+    sort        (str,     optional): Default "false", 
+    left_suf    (str,     optional): Default "_x",    
+    right_suf   (str,     optional): Default "_y",    
+    copy        (str,     optional): Default "true",  
+    indicator   (str,     optional): Default "false", 
+    validate    (str,     optional): Default None,    
+    ```
+    Returns:
+    ```
+    str: JSON
+    ```
+    """
+    js = json.loads(await item.json())
+    df1 = pd.DataFrame(js["item1"])
+    df2 = pd.DataFrame(js["item2"])
+
+    ## how
+    if how not in {"left", "right", "outer", "inner", "cross"}:
+        return f'"how" should be ["left", "right", "outer", "inner", "cross"]. current how = {how}'
+
+    ## on
+    # column or index level name(멀티인덱스일때 인덱스 컬럼의 이름)의 리스트
+    # 반드시 양 쪽 데이터 프레임에 전부 들어있어야 한다.
+    # 인덱스 컬럼은 테스트 확인하고 추가할 예정
+    if on is not None:
+        try:
+            on = on.split(",")
+            error_list = [i for i in on if i not in df1.columns]
+            if error_list:
+                return f'"on" should be string array(column names) divied by ","\nlist not in DataFrame1 columns: {error_list}'
+            error_list = [i for i in on if i not in df2.columns]
+            if error_list:
+                return f'"on" should be string array(column names) divied by ","\nlist not in DataFrame2 columns: {error_list}'
+        except:
+            return '"on" should be string array(column names) divied by ","'
+
+    ## left_on
+    if left_on is not None:
+        try:
+            left_on = left_on.split(",")
+            error_list = [i for i in left_on if i not in df1.columns]
+            if error_list:
+                return f'"left_on" should be string array(column names) divied by ","\nlist not in DataFrame1 columns: {error_list}'
+        except:
+            return '"left_on" should be string array(column names) divied by ","'
+    
+    ## right_on
+    if right_on is not None:
+        try:
+            right_on = right_on.split(",")
+            error_list = [i for i in right_on if i not in df2.columns]
+            if error_list:
+                return f'"on" should be string array(column names) divied by ","\nlist not in DataFrame2 columns: {error_list}'
+        except:
+            return '"right_on" should be string array(column names) divied by ","'
+    
+    ## left_index
+    left_index = boolean(left_index)
+    if left_index is None: return '"left_index" should be bool, "true" or "false"' 
+
+    ## right_index
+    right_index = boolean(right_index)
+    if right_index is None: return '"right_index" should be bool, "true" or "false"' 
+
+    ## sort
+    sort = boolean(sort)
+    if sort is None: return '"sort" should be bool, "true" or "false"'
+
+    ## suffixes
+    suffixes = (left_suf,right_suf)
+
+    ## copy
+    copy = boolean(copy)
+    if copy is None: return '"copy" should be bool, "true" or "false"'
+
+    ## indicator
+    indicator = boolean(indicator)
+    if indicator is None: return '"indicator" should be bool, "true" or "false"'
+
+    ## validate
+    #  If specified, checks if merge is of specified type.
+    #  “one_to_one” or “1:1”: check if merge keys are unique in both left and right datasets.
+    #  “one_to_many” or “1:m”: check if merge keys are unique in left dataset.
+    #  “many_to_one” or “m:1”: check if merge keys are unique in right dataset.
+    #  “many_to_many” or “m:m”: allowed, but does not result in checks.
+    if validate is not None:
+        if validate not in {"1:1", "1:m", "m:1", "m:m", "one_to_one", "one_to_many", "many_to_one", "many_to_many"}:
+            return f'"validate" should be ["1:1", "1:m", "m:1", "m:m", "one_to_one", "one_to_many", "many_to_one", "many_to_many"]. current validate = {validate}'
+
+    return df1.merge(
+        right        = df2,
+        how          = how,
+        on           = on,          #: IndexLabel | None = None,
+        left_on      = left_on,     #: IndexLabel | None = None,
+        right_on     = right_on,    #: IndexLabel | None = None,
+        left_index   = left_index,  #: bool = False,
+        right_index  = right_index, #: bool = False,
+        sort         = sort,        #: bool = False,
+        suffixes     = suffixes,    #: Suffixes = ("_x", "_y"),
+        copy         = copy,        #: bool = True,
+        indicator    = indicator,   #: bool = False,
+        validate     = validate,    #: str | None = None,
+    ).to_json()
+
+
+async def set_concat(
+    item:       Request,
+    *,
+    axis:       Optional[str] = Query(0,       max_length=50),
+    join:       Optional[str] = Query("outer", max_length=50),
+    ig_idx:     Optional[str] = Query("false", max_length=50),
+    keys:       Optional[str] = Query(None,    max_length=50),
+    # levels:     Optional[str] = Query(None,    max_length=50),
+    names:      Optional[str] = Query(None,    max_length=50),
+    veri_integ: Optional[str] = Query("false", max_length=50),
+    sort:       Optional[str] = Query("false", max_length=50),
+    copy:       Optional[str] = Query("true",  max_length=50),
+) -> str:
+    """
+    ```python
+    pd.concat([pandas.DataFrame, pandas.DataFrame]) # 의 결과를 리턴하는 함수
+    ```
+    Args:
+    ```
+    item       (Request, required): JSON
+    *
+    axis       (str,     optional): Default 0,       row(0), column(1)
+    join       (str,     optional): Default "outer", "inner", "outer"
+    ig_idx     (str,     optional): Default "false", true: 인덱스를 새로 붙인다. false: 인덱스를 바꾸지 않고 합친다.
+    keys       (str,     optional): Default None,    "keys" should be string array(grouped index names) divied by ","
+    # levels:    (str,     optional): Default None,    멀티인덱스에 필요한 기능 => 현재 미구현
+    names      (str,     optional): Default None,    "names" should be string array(grouped index`s column names) divied by ","
+    veri_integ (str,     optional): Default "false", true: axis에 따라 중복된 컬럼 또는 row가 있으면 에러 발생! false: 에러 없음
+    sort       (str,     optional): Default "false", true: 인덱스 기준으로 정렬한다 false: 정렬 안 한다
+    copy       (str,     optional): Default "true",  
+    ```
+    Returns:
+    ```
+    str: JSON
+    ```
+    """
+    js = json.loads(await item.json())
+    df1 = pd.DataFrame(js["item1"])
+    df2 = pd.DataFrame(js["item2"])
+
+    if type(df1) == type(df2) == pd.DataFrame:
+        objs = [df1, df2]
+    else:
+        return "merge must be needed two DataFrame"
+    
+    ## axis
+    try:
+        axis = int(axis)
+        if axis not in [0, 1]: return '"axis" should be 0, 1. row(0), column(1)'
+    except:
+        return '"axis" should be 0, 1. row(0), column(1)'
+    
+    ## join
+    if join not in ['inner', 'outer']:
+        return f'"join" should be ["inner", "outer"]. current join = {join}'
+    
+    ## ig_idx
+    ig_idx = boolean(ig_idx)
+    if ig_idx is None: return '"ig_idx" should be bool, "true" or "false"'
+
+    ## keys
+    #  pd.concat([s1, s2], keys=['s1', 's2'])
+    #  s1  0    a
+    #      1    b
+    #  s2  0    c
+    #      1    d
+    #  dtype: object
+    if keys is not None:
+        try:
+            keys = keys.split(",")
+        except:
+            return '"keys" should be string array(grouped index names) divied by ","'
+
+    ## levels
+    # 멀티인덱스 사용할 때 필요함. 추후 구현 예정
+
+
+    ## names
+    #  pd.concat([s1, s2], keys=['s1', 's2'], names=['Series name', 'Row ID'])
+    #  Series name | Row ID
+    #  s1          | 0         a
+    #              | 1         b
+    #  s2          | 0         c
+    #              | 1         d
+    #  dtype: object
+    if names is not None:
+        try:
+            names = names.split(",")
+        except:
+            return '"names" should be string array(grouped index`s column names) divied by ","'
+
+    ## veri_integ => verify_integrity
+    #  Check whether the new concatenated axis contains duplicates. 
+    #  This can be very expensive relative to the actual data concatenation.
+    veri_integ = boolean(veri_integ)
+    if veri_integ is None: return '"veri_integ: verify_integrity" should be bool, "true" or "false"'
+
+    ## sort
+    sort = boolean(sort)
+    if sort is None: return '"sort" should be bool, "true" or "false"'
+
+    ## copy
+    copy = boolean(copy)
+    if copy is None: return '"copy" should be bool, "true" or "false"'
+
+    return pd.concat(
+        objs             = objs,       #: Iterable[NDFrame] | Mapping[Hashable, NDFrame],
+        axis             = axis,       #: Axis = 0,
+        join             = join,       #: str = "outer",
+        ignore_index     = ig_idx,     #: bool = False,
+        keys             = keys,
+        # levels           = levels,
+        names            = keys,
+        verify_integrity = veri_integ, #: bool = False,
+        sort             = sort,       #: bool = False,
+        copy             = copy,       #: bool = True,
+    ).to_json()

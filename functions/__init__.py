@@ -18,7 +18,9 @@ from functions.processing import (
     set_drop,
     set_dropna,
     set_rename,
-    set_sort_values
+    set_sort_values,
+    set_merge,
+    set_concat
 )
 
 __all__ = [
@@ -38,5 +40,7 @@ __all__ = [
     "set_drop",
     "set_dropna",
     "set_rename",
-    "set_sort_values"
+    "set_sort_values",
+    "set_merge",
+    "set_concat"
 ]
