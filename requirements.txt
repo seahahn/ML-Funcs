@@ -2,6 +2,7 @@ numpy
 modin[all]
 sklearn
 bokeh
-fastapi uvicorn[standard]
+fastapi
+uvicorn[standard]
 python-multipart
 openpyxl
