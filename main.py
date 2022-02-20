@@ -20,7 +20,9 @@ from functions import (
     set_drop,
     set_dropna,
     set_rename,
-    set_sort_values
+    set_sort_values,
+    set_merge,
+    set_concat
 )
 
 create_upload_file = app.post("/uploadfile")          (create_upload_file)
@@ -41,4 +43,6 @@ set_drop           = app.post("/file/drop")           (set_drop)
 set_dropna         = app.post("/file/dropna")         (set_dropna)
 set_rename         = app.post("/file/rename")         (set_rename)
 set_sort_values    = app.post("/file/sort/values")    (set_sort_values)
-# set_sort_index    = app.post("/file/sort/index")      (set_sort_index)
+# set_sort_index     = app.post("/file/sort/index")     (set_sort_index)
+set_merge          = app.post("/file/merge")          (set_merge)
+set_concat         = app.post("/file/concat")         (set_concat)
