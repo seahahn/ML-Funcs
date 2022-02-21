@@ -18,14 +18,14 @@ import re
 templates = Jinja2Templates(directory="functions/templates")
 
 
-async def basic(item : Request):
-    plot = figure()
-    plot.circle([1,2, 5], [3,4, 8], size=20, color="red", alpha=0.5)
-    script, div = components(plot)
-    # div = Markup(div)
-    # script = Markup(script)
-    # return script, div
-    return templates.TemplateResponse("plot_test.html", {"request": item, "plot1_div": div, "plot1_script":script})
+# async def basic(item : Request):
+#     plot = figure()
+#     plot.circle([1,2, 5], [3,4, 8], size=20, color="red", alpha=0.5)
+#     script, div = components(plot)
+#     # div = Markup(div)
+#     # script = Markup(script)
+#     # return script, div
+#     return templates.TemplateResponse("plot_test.html", {"request": item, "plot1_div": div, "plot1_script":script})
 
 
 async def box_plot(
@@ -114,8 +114,38 @@ async def box_plot(
     # return templates.TemplateResponse("plot_test.html", {"request": item, "plot1_div": div, "plot1_script":script})
     return script, div
 
-async def hist_plot(item : Request):
-    pass
+async def hist_plot(
+    item : Request,                                         #data
+    cols : Optional[str] = Query(None, max_length = 30)
+):
+    #테스트 셋
+    # df = pd.DataFrame({"a" : np.random.randn(2000), "b" : np.random.randn(2000), "c" : np.random.randn(2000), "d": np.random.randn(2000) })
+    # cols = "a,b,c,d"
+
+    df = pd.read_json(await item.json())
+    # , " "를 구분자로 사용하여 분리하는 정규식을 차후 적용
+    cols = list(re.split('[,]',cols))
+
+
+    #각 특징별 특징명, 사분위 값, IQR, 이상치를 보관
+    feature = []
+
+
+    #출력하고자하는 특징이 데이터프레임내에 존재하는지 확인
+    for col in cols:
+        if not col in df.columns:
+            return {
+                "stat" : 200,
+                "body" : f"{col}이라는 특징이 없습니다. 가능 특징{df.columns}"
+            }
+        if df[col].dtype != np.float64 and df[col].dtype != np.float32 and df[col].dtype != np.int64 and df[col].dtype != np.int32:
+             return {
+                "stat" : 200,
+                "body" : f"{col}이라는 특징은 숫자형 자료가 아닙니다."
+            }
+        feature.append(col)
+
+
 
 
 async def count_plot(item : Request):
