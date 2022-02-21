@@ -1,5 +1,4 @@
-from typing import Optional
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
@@ -26,6 +25,7 @@ app.add_middleware(
 
 from functions import (
     create_upload_file, 
+
     get_head, 
     get_tail, 
     get_shape,
@@ -36,6 +36,11 @@ from functions import (
     get_na,
     get_corr,
     get_describe,
+    get_loc,
+    get_iloc,
+    get_col,
+    get_col_condition,
+
     set_transpose,
     set_groupby,
     set_drop,
@@ -57,6 +62,10 @@ get_unique_column  = app.post("/file/unique/{column}")(get_unique_column)
 get_na             = app.post("/file/isna")           (get_na)
 get_corr           = app.post("/file/corr")           (get_corr)
 get_describe       = app.post("/file/describe")       (get_describe)
+get_loc            = app.post("/file/loc")            (get_loc)
+get_iloc           = app.post("/file/iloc")           (get_iloc)
+
+get_col_condition  = app.post("/file/{col}/condition")(get_col_condition)
 
 
 from functions import (box_plot)
