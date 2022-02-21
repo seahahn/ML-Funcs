@@ -12,7 +12,7 @@ def boolean(x):
 
 
 async def set_transpose(item: Request) -> str:
-    return pd.read_json(await item.json()).transpose().to_json()
+    return pd.read_json(await item.json()).transpose().to_json(orient="records")
 
 
 async def set_groupby(
@@ -132,7 +132,7 @@ async def set_groupby(
         "size"  : df_group.size
     }
     
-    return functions[func]().to_json()
+    return functions[func]().to_json(orient="records")
 
 
 async def set_drop(
@@ -210,7 +210,7 @@ async def set_drop(
         # columns=None,
         # level=None,
         # inplace=False,
-    ).to_json()
+    ).to_json(orient="records")
 
 
 async def set_dropna(
@@ -281,7 +281,7 @@ async def set_dropna(
         thresh  = thresh,
         subset  = subset,
         # inplace = False,
-    ).to_json()
+    ).to_json(orient="records")
 
 
 async def set_rename(
@@ -353,7 +353,7 @@ async def set_rename(
         axis   = 1,
         copy   = copy,
         errors = errors,
-    ).to_json()
+    ).to_json(orient="records")
 
 
 async def set_sort_values(
@@ -436,7 +436,7 @@ async def set_sort_values(
         ignore_index = ig_idx,
         key          = key, # 현재 미구현
         # inplace      = inplace,
-    ).to_json()
+    ).to_json(orient="records")
 
 
 async def set_merge(
@@ -573,7 +573,7 @@ async def set_merge(
         copy         = copy,        #: bool = True,
         indicator    = indicator,   #: bool = False,
         validate     = validate,    #: str | None = None,
-    ).to_json()
+    ).to_json(orient="records")
 
 
 async def set_concat(
@@ -692,6 +692,7 @@ async def set_concat(
         verify_integrity = veri_integ, #: bool = False,
         sort             = sort,       #: bool = False,
         copy             = copy,       #: bool = True,
-    ).to_json()
+    ).to_json(orient="records")
+
 
 
