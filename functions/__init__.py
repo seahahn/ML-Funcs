@@ -1,4 +1,6 @@
 from functions.data2json import create_upload_file
+from functions.AI_plot import (box_plot)
+
 from functions.eda import (
     get_head, 
     get_tail, 
@@ -50,5 +52,6 @@ __all__ = [
     "set_rename",
     "set_sort_values",
     "set_merge",
-    "set_concat"
+    "set_concat",
+    "box_plot"
 ]

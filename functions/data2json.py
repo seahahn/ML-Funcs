@@ -24,18 +24,18 @@ async def create_upload_file(file: UploadFile):
     # df = pd.DataFrame(x)
     # df.columns = df.iloc[0]
     # df = df.drop(0).reset_index(drop=True)
-    
+
 
     ############ .xlsx #############
     # 판다스
     # df = pd.read_excel(await file.read())
 
     # 모딘
-    
+
     # print(type(await file.read()))
     # 파일 종료(시스템에 자원 반납)
     await file.close()
-    
+
     print(df.head())
     return df.to_json(orient="records") # 판다스의 to_json()과 완전 동일한 함수
 

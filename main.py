@@ -65,6 +65,15 @@ get_col_condition  = app.post("/file/{col}/condition")(get_col_condition)
 get_loc            = app.post("/file/loc")            (get_loc)
 get_iloc           = app.post("/file/iloc")           (get_iloc)
 
+
+
+
+
+from functions import (box_plot)
+
+box_plot = app.get("/plot/boxplot")(box_plot)
+
+
 set_transpose      = app.post("/file/transpose")      (set_transpose)
 set_groupby        = app.post("/file/groupby/{func}") (set_groupby)
 set_drop           = app.post("/file/drop")           (set_drop)
