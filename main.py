@@ -36,10 +36,9 @@ from functions import (
     get_na,
     get_corr,
     get_describe,
+    get_col_condition,
     get_loc,
     get_iloc,
-    get_col,
-    get_col_condition,
 
     set_transpose,
     set_groupby,
@@ -62,15 +61,18 @@ get_unique_column  = app.post("/file/unique/{column}")(get_unique_column)
 get_na             = app.post("/file/isna")           (get_na)
 get_corr           = app.post("/file/corr")           (get_corr)
 get_describe       = app.post("/file/describe")       (get_describe)
+get_col_condition  = app.post("/file/{col}/condition")(get_col_condition)
 get_loc            = app.post("/file/loc")            (get_loc)
 get_iloc           = app.post("/file/iloc")           (get_iloc)
 
-get_col_condition  = app.post("/file/{col}/condition")(get_col_condition)
+
+
 
 
 from functions import (box_plot)
 
 box_plot = app.get("/plot/boxplot")(box_plot)
+
 
 set_transpose      = app.post("/file/transpose")      (set_transpose)
 set_groupby        = app.post("/file/groupby/{func}") (set_groupby)
