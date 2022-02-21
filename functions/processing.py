@@ -68,7 +68,7 @@ async def set_groupby(
     try:
         # if by is None:
         #     return '"by" is a required parameter.'
-        by = by.split(",")
+        by = [i.strip() for i in by.split(",") if i.strip() != ""]
         error_list = [i for i in by if i not in df.columns]
         if error_list:
             return f'"by" should be string array(column names) divied by ","\nlist not in DataFrame columns: {error_list}'
@@ -184,7 +184,7 @@ async def set_drop(
     try:
         # if labels is None:
         #     return '"labels" is a required parameter.'
-        labels = labels.split(",")
+        labels = [i.strip() for i in labels.split(",") if i.strip() != ""]
         if errors == "raise":
             if axis: 
                 cols = df.columns
@@ -268,7 +268,7 @@ async def set_dropna(
     # these would be a list of columns to include.
     if subset is not None:
         try:
-            subset = subset.split(",")
+            subset = [i.strip() for i in subset.split(",") if i.strip() != ""]
             error_list = [i for i in subset if i not in df.columns]
             if error_list:
                 return f'"subset" should be string array(column names) divied by ",". list not in DataFrame columns: {error_list}'
@@ -320,7 +320,7 @@ async def set_rename(
 
     ## keys
     try:
-        keys = keys.split(",")
+        keys = [i.strip() for i in keys.split(",") if i.strip() != ""]
         if errors == "raise":
             error_list = [i for i in keys if i not in df.columns]
             if error_list:
@@ -330,7 +330,7 @@ async def set_rename(
     
     ## values
     try:
-        values = values.split(",")
+        values = [i.strip() for i in values.split(",") if i.strip() != ""]
     except:
         return f'"values" should be string array(new column names) divied by ",". current values = {values}'
     
@@ -394,7 +394,7 @@ async def set_sort_values(
 
     ## by
     try:
-        by = by.split(",")
+        by = [i.strip() for i in by.split(",") if i.strip() != ""]
         error_list = [i for i in by if i not in df.columns]
         if error_list:
             return f'"by" should be string array(column names) divied by ","\nlist not in DataFrame columns: {error_list}'
@@ -497,7 +497,7 @@ async def set_merge(
     # 인덱스 컬럼은 테스트 확인하고 추가할 예정
     if on is not None:
         try:
-            on = on.split(",")
+            on = [i.strip() for i in on.split(",") if i.strip() != ""]
             error_list = [i for i in on if i not in df1.columns]
             if error_list:
                 return f'"on" should be string array(column names) divied by ","\nlist not in DataFrame1 columns: {error_list}'
@@ -510,7 +510,7 @@ async def set_merge(
     ## left_on
     if left_on is not None:
         try:
-            left_on = left_on.split(",")
+            left_on = [i.strip() for i in left_on.split(",") if i.strip() != ""]
             error_list = [i for i in left_on if i not in df1.columns]
             if error_list:
                 return f'"left_on" should be string array(column names) divied by ","\nlist not in DataFrame1 columns: {error_list}'
@@ -520,7 +520,7 @@ async def set_merge(
     ## right_on
     if right_on is not None:
         try:
-            right_on = right_on.split(",")
+            right_on = [i.strip() for i in right_on.split(",") if i.strip() != ""]
             error_list = [i for i in right_on if i not in df2.columns]
             if error_list:
                 return f'"on" should be string array(column names) divied by ","\nlist not in DataFrame2 columns: {error_list}'
@@ -645,7 +645,7 @@ async def set_concat(
     #  dtype: object
     if keys is not None:
         try:
-            keys = keys.split(",")
+            keys = [i.strip() for i in keys.split(",") if i.strip() != ""]
         except:
             return '"keys" should be string array(grouped index names) divied by ","'
 
@@ -663,7 +663,7 @@ async def set_concat(
     #  dtype: object
     if names is not None:
         try:
-            names = names.split(",")
+            names = [i.strip() for i in names.split(",") if i.strip() != ""]
         except:
             return '"names" should be string array(grouped index`s column names) divied by ","'
 
@@ -695,4 +695,7 @@ async def set_concat(
     ).to_json(orient="records")
 
 
+async def set_new_columns(
 
+) -> str:
+    ...

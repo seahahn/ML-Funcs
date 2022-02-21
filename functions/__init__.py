@@ -12,11 +12,11 @@ from functions.eda import (
     get_na,
     get_corr,
     get_describe,
+    get_col_condition,
     get_loc,
     get_iloc,
-    get_col_condition
-    
 )
+
 from functions.processing import (
     set_transpose,
     set_groupby,
@@ -41,9 +41,9 @@ __all__ = [
     "get_na",
     "get_corr",
     "get_describe",
+    "get_col_condition",
     "get_loc",
     "get_iloc",
-    "get_col_condition",
 
     "set_transpose",
     "set_groupby",
