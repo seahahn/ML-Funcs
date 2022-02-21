@@ -12,7 +12,6 @@ from functions.eda import (
     get_describe,
     get_loc,
     get_iloc,
-    get_col,
     get_col_condition
     
 )
@@ -42,7 +41,6 @@ __all__ = [
     "get_describe",
     "get_loc",
     "get_iloc",
-    "get_col"
     "get_col_condition",
 
     "set_transpose",
