@@ -21,3 +21,9 @@ def update_item(item_id: int, item: Request):
 from functions import create_upload_file
 
 create_upload_file = app.post("/uploadfile/")(create_upload_file)
+
+from functions import (basic, box_plot)
+
+basic = app.get("/test/")(basic)
+box_plot = app.get("/test2/")(box_plot)
+
