@@ -11,7 +11,8 @@ from functions.eda import (
     get_corr,
     get_describe,
     get_loc,
-    get_iloc
+    get_iloc,
+    get_by_condition
     
 )
 from functions.processing import (
@@ -27,6 +28,7 @@ from functions.processing import (
 
 __all__ = [
     "create_upload_file", 
+    
     "get_head", 
     "get_tail", 
     "get_shape",
@@ -38,6 +40,8 @@ __all__ = [
     "get_corr",
     "get_describe",
     "get_loc",
+    "get_iloc",
+    "get_by_condition",
 
     "set_transpose",
     "set_groupby",

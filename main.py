@@ -1,5 +1,4 @@
-from typing import Optional
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
@@ -26,6 +25,7 @@ app.add_middleware(
 
 from functions import (
     create_upload_file, 
+
     get_head, 
     get_tail, 
     get_shape,
@@ -38,6 +38,7 @@ from functions import (
     get_describe,
     get_loc,
     get_iloc,
+    get_by_condition,
 
     set_transpose,
     set_groupby,
@@ -62,6 +63,7 @@ get_corr           = app.post("/file/corr")           (get_corr)
 get_describe       = app.post("/file/describe")       (get_describe)
 get_loc            = app.post("/file/loc")            (get_loc)
 get_iloc           = app.post("/file/iloc")           (get_iloc)
+get_by_condition   = app.post("/file/by_condition")   (get_by_condition)
 
 set_transpose      = app.post("/file/transpose")      (set_transpose)
 set_groupby        = app.post("/file/groupby/{func}") (set_groupby)
