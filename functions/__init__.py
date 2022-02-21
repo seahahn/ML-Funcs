@@ -10,6 +10,8 @@ from functions.eda import (
     get_na,
     get_corr,
     get_describe,
+    get_loc,
+    get_iloc
     
 )
 from functions.processing import (
@@ -35,6 +37,8 @@ __all__ = [
     "get_na",
     "get_corr",
     "get_describe",
+    "get_loc",
+
     "set_transpose",
     "set_groupby",
     "set_drop",

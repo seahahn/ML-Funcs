@@ -15,6 +15,9 @@ from functions import (
     get_na,
     get_corr,
     get_describe,
+    get_loc,
+    get_iloc,
+
     set_transpose,
     set_groupby,
     set_drop,
@@ -36,6 +39,8 @@ get_unique_column  = app.post("/file/unique/{column}")(get_unique_column)
 get_na             = app.post("/file/isna")           (get_na)
 get_corr           = app.post("/file/corr")           (get_corr)
 get_describe       = app.post("/file/describe")       (get_describe)
+get_loc            = app.post("/file/loc")            (get_loc)
+get_iloc           = app.post("/file/iloc")           (get_iloc)
 
 set_transpose      = app.post("/file/transpose")      (set_transpose)
 set_groupby        = app.post("/file/groupby/{func}") (set_groupby)

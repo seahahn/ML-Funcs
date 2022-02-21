@@ -255,3 +255,218 @@ async def get_describe(
         exclude             = exclude if exclude else None,
         datetime_is_numeric = True if date2num.lower() == "true" else False
     ).to_json()
+
+
+async def get_by_condition(
+    item     : Request,
+    *,
+    col      : Optional[str] = Query(None, max_length=50),
+    cond1    : Optional[str] = Query(None, max_length=50),
+    value1   : Optional[str] = Query(None, max_length=50),
+    cond2    : Optional[str] = Query(None, max_length=50),
+    value2   : Optional[str] = Query(None, max_length=50),
+) -> str:
+    """
+    ```python
+    _summary_
+    ```
+    Args:
+    ```
+    item   (Request): _description_
+    col    (Optional[str], optional): _description_. Defaults to Query(None, max_length=50).
+    cond1  (Optional[str], optional): _description_. Defaults to Query(None, max_length=50).
+    value1 (Optional[str], optional): _description_. Defaults to Query(None, max_length=50).
+    cond2  (Optional[str], optional): _description_. Defaults to Query(None, max_length=50).
+    value2 (Optional[str], optional): _description_. Defaults to Query(None, max_length=50).
+    ```
+    Returns:
+    ```
+    str: _description_
+    ```
+    """
+    df = pd.read_json(await item.json())
+    
+    if str(df.columns.dtype) == "int64":
+        col = int(col)
+    cols = list(df.columns)
+    if col in cols:
+        if cond2:
+            if cond1[0] == "l":
+                cond2, cond1 = cond1, cond2
+            if   cond1 == "gr"    and cond2 == "le"   : 
+                if value1 >= value2: return df[(df[col] >  value1)|(df[col] <  value2)].to_json()
+                else               : return df[(df[col] >  value1)&(df[col] <  value2)].to_json()
+            elif cond1 == "gr"    and cond2 == "le_eq":
+                if value1 >= value2: return df[(df[col] >  value1)|(df[col] <= value2)].to_json()
+                else               : return df[(df[col] >  value1)&(df[col] <= value2)].to_json()
+            elif cond1 == "gr_eq" and cond2 == "le"   : 
+                if value1 >= value2: return df[(df[col] >= value1)|(df[col] <  value2)].to_json()
+                else               : return df[(df[col] >= value1)&(df[col] <  value2)].to_json()
+            elif cond1 == "gr_eq" and cond2 == "le_eq": 
+                if value1 >= value2: return df[(df[col] >= value1)|(df[col] <= value2)].to_json()
+                else               : return df[(df[col] >= value1)&(df[col] <= value2)].to_json()
+        elif cond1:
+            if   cond1 == "eq"   : df[df[col] == value1].to_json()
+            elif cond1 == "gr"   : df[df[col] >  value1].to_json()
+            elif cond1 == "gr_eq": df[df[col] >= value1].to_json()
+            elif cond1 == "le"   : df[df[col] <  value1].to_json()
+            elif cond1 == "le_eq": df[df[col] <= value1].to_json()
+        return df[col].to_json()
+    else:
+        return f"{col} is not in columns of DataFrame. It should be in {cols}"
+
+
+async def get_loc(
+    item     : Request,
+    *,
+    idx      : Optional[str] = Query(None, max_length=50),
+    idx_from : Optional[str] = Query(None, max_length=50),
+    idx_to   : Optional[str] = Query(None, max_length=50),
+    col      : Optional[str] = Query(None, max_length=50),
+    col_from : Optional[str] = Query(None, max_length=50),
+    col_to   : Optional[str] = Query(None, max_length=50),
+) -> str:
+    """
+    ```python
+    _summary_
+    ```
+    Args:
+    ```
+    item     (Request): _description_
+    *
+    idx      (Optional[str], optional): _description_. Defaults to Query(None, max_length=50).
+    idx_from (Optional[str], optional): _description_. Defaults to Query(None, max_length=50).
+    idx_to   (Optional[str], optional): _description_. Defaults to Query(None, max_length=50).
+    col      (Optional[str], optional): _description_. Defaults to Query(None, max_length=50).
+    col_from (Optional[str], optional): _description_. Defaults to Query(None, max_length=50).
+    col_to   (Optional[str], optional): _description_. Defaults to Query(None, max_length=50).
+    ```
+    Returns:
+    ```
+    str: _description_
+    ```
+    """
+    df = pd.read_json(await item.json())
+
+    if str(df.index.dtype) == "int64":
+        if idx is None: 
+            if idx_from is not None: 
+                try   : idx_from = int(idx_from)
+                except: return "index type is int. idx_from should be int."
+            if idx_to is not None: 
+                try   : idx_to = int(idx_to)
+                except: return "index type is int. idx_to should be int."
+        else:
+            idx_from = idx_to = None
+            try   : idx = int(idx)
+            except: return "index type is int. idx should be int."
+    
+    if str(df.columns.dtype) == "int64":
+        if col is None:
+            if col_from is not None: 
+                try   : col_from = int(col_from)
+                except: return "column type is int. col_from should be int."
+            if col_to is not None: 
+                try   : col_to = int(col_to)
+                except: return "column type is int. col_to should be int."
+        else:
+            col_from = col_to = None
+            try   : col = int(col)
+            except: return "column type is int. col should be int."
+    
+    idxs = list(df.index)
+    if idx      and idx      not in idxs: return f"{idx} is not in index of DataFrame. It should be in {idxs}"
+    if idx_from and idx_from not in idxs: return f"{idx_from} is not in index of DataFrame. It should be in {idxs}"
+    if idx_to   and idx_to   not in idxs: return f"{idx_to} is not in index of DataFrame. It should be in {idxs}"
+    
+    cols = list(df.columns)
+    if col: 
+        if col in cols: 
+            if idx is None: return df.loc[idx_from:idx_to,col].to_json()
+            else          : return df.loc[idx,col].to_json()
+        else:
+            return f"{col} is not in columns of DataFrame. It should be in {cols}"
+
+    if col_from and col_from not in cols: return f"{col_from} is not in columns of DataFrame. It should be in {cols}"
+    if col_to   and col_to   not in cols: return f"{col_to} is not in columns of DataFrame. It should be in {cols}"
+    
+    if idx is None: return df.loc[idx_from:idx_to,col_from:col_to].to_json()
+    else          : return df.loc[idx,col_from:col_to].to_json()
+
+
+async def get_iloc(
+    item:     Request,
+    *,
+    idx      : Optional[str] = Query(None, max_length=50),
+    idx_from : Optional[str] = Query(None, max_length=50),
+    idx_to   : Optional[str] = Query(None, max_length=50),
+    col      : Optional[str] = Query(None, max_length=50),
+    col_from : Optional[str] = Query(None, max_length=50),
+    col_to   : Optional[str] = Query(None, max_length=50),
+) -> str:
+    """
+    ```python
+    _summary_
+    ```
+    Args:
+    ```
+    item     (Request): _description_
+    *
+    idx      (Optional[str], optional): _description_. Defaults to Query(None, max_length=50).
+    idx_from (Optional[str], optional): _description_. Defaults to Query(None, max_length=50).
+    idx_to   (Optional[str], optional): _description_. Defaults to Query(None, max_length=50).
+    col      (Optional[str], optional): _description_. Defaults to Query(None, max_length=50).
+    col_from (Optional[str], optional): _description_. Defaults to Query(None, max_length=50).
+    col_to   (Optional[str], optional): _description_. Defaults to Query(None, max_length=50).
+    ```
+    Returns:
+    ```
+    str: _description_
+    ```
+    """
+    df = pd.read_json(await item.json())
+
+    if idx is None: 
+        if idx_from is not None: 
+            try   : idx_from = int(idx_from)
+            except: return "idx_from should be int in iloc."
+        if idx_to is not None: 
+            try   : idx_to = int(idx_to)
+            except: return "idx_to should be int in iloc."
+    else:
+        idx_from = idx_to = None
+        try   : idx = int(idx)
+        except: return "idx should be int in iloc."
+
+    if col is None:
+        if col_from is not None: 
+            try   : col_from = int(col_from)
+            except: return "col_from should be int in iloc."
+        if col_to is not None: 
+            try   : col_to = int(col_to)
+            except: return "col_to should be int in iloc."
+    else:
+        col_from = col_to = None
+        try   : col = int(col)
+        except: return "col should be int in iloc."
+
+    idxs = list(df.index)
+    if idx      and idx      not in idxs: return f"{idx} is not in index of DataFrame. It should be in {idxs}"
+    if idx_from and idx_from not in idxs: return f"{idx_from} is not in index of DataFrame. It should be in {idxs}"
+    if idx_to   and idx_to   not in idxs: return f"{idx_to} is not in index of DataFrame. It should be in {idxs}"
+    
+    cols = list(df.columns)
+    if col: 
+        if col in cols: 
+            if idx is None: return df.iloc[idx_from:idx_to,col].to_json()
+            else          : return df.iloc[idx,col].to_json()
+        else:
+            return f"{col} is not in columns of DataFrame. It should be in {cols}"
+
+    if col_from and col_from not in cols: return f"{col_from} is not in columns of DataFrame. It should be in {cols}"
+    if col_to   and col_to   not in cols: return f"{col_to} is not in columns of DataFrame. It should be in {cols}"
+    
+    if idx is None: return df.iloc[idx_from:idx_to,col_from:col_to].to_json()
+    else          : return df.iloc[idx,col_from:col_to].to_json()
+    
+    
