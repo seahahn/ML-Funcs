@@ -29,12 +29,12 @@ async def basic(item : Request):
 
 
 async def box_plot(
-    item : Request,
-    cols : Optional[str] = Query(None, max_length = 30),
-    tools : Optional[str] = Query("", max_length= 20),
+    item : Request,                                         #data
+    cols : Optional[str] = Query(None, max_length = 30),    #출력하고자하는 특징들(string)
+    tools : Optional[str] = Query("", max_length= 20),      #...
     background_fill_color : Optional[str] = Query("#efefef", max_length= 16),
-    fill_color1 : Optional[str] = Query("#E08E79", max_length= 16),
-    fill_color2 : Optional[str] = Query("#3B8686", max_length= 16)
+    fill_color1 : Optional[str] = Query("#E08E79", max_length= 16), #상자의 q2 ~ q3까지의 색깔 지정
+    fill_color2 : Optional[str] = Query("#3B8686", max_length= 16) #상자의 q1 ~ q2까지의 색깔 지정
     ):
 
     #테스트 셋
