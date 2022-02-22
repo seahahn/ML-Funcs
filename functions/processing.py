@@ -12,15 +12,15 @@ def boolean(x):
 
 
 async def set_transpose(item: Request) -> str:
-    return pd.read_json(await item.json()).transpose().to_json()
+    return pd.read_json(await item.json()).transpose().to_json(orient="records")
 
 
 async def set_groupby(
-    func:       str,
     item:       Request,
     by:         str,
+    func:       str,
     *,
-    axis:       Optional[str] = Query(0,     max_length=50),
+    axis:       Optional[str] = Query(0,       max_length=50),
     as_index:   Optional[str] = Query("True",  max_length=50), 
     sort:       Optional[str] = Query("True",  max_length=50), 
     group_keys: Optional[str] = Query("True",  max_length=50), 
@@ -68,7 +68,7 @@ async def set_groupby(
     try:
         # if by is None:
         #     return '"by" is a required parameter.'
-        by = by.split(",")
+        by = [i.strip() for i in by.split(",") if i.strip() != ""]
         error_list = [i for i in by if i not in df.columns]
         if error_list:
             return f'"by" should be string array(column names) divied by ","\nlist not in DataFrame columns: {error_list}'
@@ -132,7 +132,7 @@ async def set_groupby(
         "size"  : df_group.size
     }
     
-    return functions[func]().to_json()
+    return functions[func]().to_json(orient="records")
 
 
 async def set_drop(
@@ -184,7 +184,7 @@ async def set_drop(
     try:
         # if labels is None:
         #     return '"labels" is a required parameter.'
-        labels = labels.split(",")
+        labels = [i.strip() for i in labels.split(",") if i.strip() != ""]
         if errors == "raise":
             if axis: 
                 cols = df.columns
@@ -210,7 +210,7 @@ async def set_drop(
         # columns=None,
         # level=None,
         # inplace=False,
-    ).to_json()
+    ).to_json(orient="records")
 
 
 async def set_dropna(
@@ -268,7 +268,7 @@ async def set_dropna(
     # these would be a list of columns to include.
     if subset is not None:
         try:
-            subset = subset.split(",")
+            subset = [i.strip() for i in subset.split(",") if i.strip() != ""]
             error_list = [i for i in subset if i not in df.columns]
             if error_list:
                 return f'"subset" should be string array(column names) divied by ",". list not in DataFrame columns: {error_list}'
@@ -281,7 +281,7 @@ async def set_dropna(
         thresh  = thresh,
         subset  = subset,
         # inplace = False,
-    ).to_json()
+    ).to_json(orient="records")
 
 
 async def set_rename(
@@ -298,24 +298,29 @@ async def set_rename(
     # inplace: Optional[str] = Query("false",  max_length=50), # inplace is not needed in this way
     # level:   Optional[str] = Query(None,     max_length=50), # level is for multi-index
 ) -> str:
-    """pandas.DataFrame.rename() 을 리턴하는 함수
-
+    """
+    ```python
+    pandas.DataFrame.rename() 을 리턴하는 함수
+    ```
     Args:
-        item   (Request, required): JSON
-        keys   (str,     required): "keys" should be string array(column names) divied by ","
-        values (str,     required): "values" should be string array(new column names) divied by ","
-        *
-        copy   (str,     optional): Default "true",   ??? "Also copy underlying data"
-        errors (str,     optional): Default "ignore", "raise" 일 경우 keys에 없는 컬럼명이 있는 경우 에러 발생
-
+    ```
+    item   (Request, required): JSON
+    keys   (str,     required): "keys" should be string array(column names) divied by ","
+    values (str,     required): "values" should be string array(new column names) divied by ","
+    *
+    copy   (str,     optional): Default "true",   ??? "Also copy underlying data"
+    errors (str,     optional): Default "ignore", "raise" 일 경우 keys에 없는 컬럼명이 있는 경우 에러 발생
+    ```
     Returns:
-        str: JSON
+    ```
+    str: JSON
+    ```
     """
     df = pd.read_json(await item.json())
 
     ## keys
     try:
-        keys = keys.split(",")
+        keys = [i.strip() for i in keys.split(",") if i.strip() != ""]
         if errors == "raise":
             error_list = [i for i in keys if i not in df.columns]
             if error_list:
@@ -325,7 +330,7 @@ async def set_rename(
     
     ## values
     try:
-        values = values.split(",")
+        values = [i.strip() for i in values.split(",") if i.strip() != ""]
     except:
         return f'"values" should be string array(new column names) divied by ",". current values = {values}'
     
@@ -348,7 +353,7 @@ async def set_rename(
         axis   = 1,
         copy   = copy,
         errors = errors,
-    ).to_json()
+    ).to_json(orient="records")
 
 
 async def set_sort_values(
@@ -389,7 +394,7 @@ async def set_sort_values(
 
     ## by
     try:
-        by = by.split(",")
+        by = [i.strip() for i in by.split(",") if i.strip() != ""]
         error_list = [i for i in by if i not in df.columns]
         if error_list:
             return f'"by" should be string array(column names) divied by ","\nlist not in DataFrame columns: {error_list}'
@@ -431,7 +436,7 @@ async def set_sort_values(
         ignore_index = ig_idx,
         key          = key, # 현재 미구현
         # inplace      = inplace,
-    ).to_json()
+    ).to_json(orient="records")
 
 
 async def set_merge(
@@ -460,18 +465,18 @@ async def set_merge(
     ```
     item        (Request, required): JSON
     *
-    how         (str,     optional): Default "inner", 
-    on          (str,     optional): Default None,    
-    left_on     (str,     optional): Default None,    
-    right_on    (str,     optional): Default None,    
-    left_index  (str,     optional): Default "false", 
-    right_index (str,     optional): Default "false", 
-    sort        (str,     optional): Default "false", 
-    left_suf    (str,     optional): Default "_x",    
-    right_suf   (str,     optional): Default "_y",    
-    copy        (str,     optional): Default "true",  
-    indicator   (str,     optional): Default "false", 
-    validate    (str,     optional): Default None,    
+    how         (str,     optional): Default "inner", inner: inner join, outer: outer join
+    on          (str,     optional): Default None,    조인할 대상 컬럼(양쪽 DataFrame에 다 있어야 함)
+    left_on     (str,     optional): Default None,    조인할 대상 컬럼(왼쪽)
+    right_on    (str,     optional): Default None,    조인할 대상 컬럼(오른쪽)
+    left_index  (str,     optional): Default "false", ??
+    right_index (str,     optional): Default "false", ??
+    sort        (str,     optional): Default "false", true: 인덱스 기준으로 정렬, false 정렬 안 함
+    left_suf    (str,     optional): Default "_x",    왼쪽 dataframe 컬럼에 붙일 접미사(on이 아닐경우)
+    right_suf   (str,     optional): Default "_y",    오른쪽 dataframe 컬럼에 붙일 접미사(on이 아닐경우)
+    copy        (str,     optional): Default "true",  잘 모르겠음
+    indicator   (str,     optional): Default "false", 잘 모르겠음
+    validate    (str,     optional): Default None,    머지된 dataframe이 해당 유형인지 확인
     ```
     Returns:
     ```
@@ -492,7 +497,7 @@ async def set_merge(
     # 인덱스 컬럼은 테스트 확인하고 추가할 예정
     if on is not None:
         try:
-            on = on.split(",")
+            on = [i.strip() for i in on.split(",") if i.strip() != ""]
             error_list = [i for i in on if i not in df1.columns]
             if error_list:
                 return f'"on" should be string array(column names) divied by ","\nlist not in DataFrame1 columns: {error_list}'
@@ -505,7 +510,7 @@ async def set_merge(
     ## left_on
     if left_on is not None:
         try:
-            left_on = left_on.split(",")
+            left_on = [i.strip() for i in left_on.split(",") if i.strip() != ""]
             error_list = [i for i in left_on if i not in df1.columns]
             if error_list:
                 return f'"left_on" should be string array(column names) divied by ","\nlist not in DataFrame1 columns: {error_list}'
@@ -515,7 +520,7 @@ async def set_merge(
     ## right_on
     if right_on is not None:
         try:
-            right_on = right_on.split(",")
+            right_on = [i.strip() for i in right_on.split(",") if i.strip() != ""]
             error_list = [i for i in right_on if i not in df2.columns]
             if error_list:
                 return f'"on" should be string array(column names) divied by ","\nlist not in DataFrame2 columns: {error_list}'
@@ -568,7 +573,7 @@ async def set_merge(
         copy         = copy,        #: bool = True,
         indicator    = indicator,   #: bool = False,
         validate     = validate,    #: str | None = None,
-    ).to_json()
+    ).to_json(orient="records")
 
 
 async def set_concat(
@@ -640,7 +645,7 @@ async def set_concat(
     #  dtype: object
     if keys is not None:
         try:
-            keys = keys.split(",")
+            keys = [i.strip() for i in keys.split(",") if i.strip() != ""]
         except:
             return '"keys" should be string array(grouped index names) divied by ","'
 
@@ -658,7 +663,7 @@ async def set_concat(
     #  dtype: object
     if names is not None:
         try:
-            names = names.split(",")
+            names = [i.strip() for i in names.split(",") if i.strip() != ""]
         except:
             return '"names" should be string array(grouped index`s column names) divied by ","'
 
@@ -687,4 +692,42 @@ async def set_concat(
         verify_integrity = veri_integ, #: bool = False,
         sort             = sort,       #: bool = False,
         copy             = copy,       #: bool = True,
-    ).to_json()
+    ).to_json(orient="records")
+
+
+async def set_column(
+    item: Request,
+    col : str,
+    *,
+    cols: Optional[str] = Query(None, max_length=50),
+    math: Optional[str] = Query(None, max_length=50),
+    func: Optional[str] = Query(None, max_length=50),
+) -> str:
+    
+    df = pd.read_json(await item.json())
+    cols = [i.strip() for i in cols.split(",") if i.strip() != ""]
+    math = [i.strip() for i in math.split(",") if i.strip() != ""]
+    # left: df[col], right: some function
+    # df[col] =
+
+    # cols = col1,col2,col3....
+    # math = + - x /
+    # func = sum, std, mean ...
+
+    # cols + math
+    # df[col] = (((df[col1] + df[col2]) - df[col3]) * df[col4])
+
+    maths = {
+        "add" : lambda x, y: x + y,
+        "mul" : lambda x, y: x * y,
+        "sub" : lambda x, y: x - y,
+        "isub": lambda x, y: y - x,
+        "div" : lambda x, y: x / y,
+        "idiv": lambda x, y: y / x,
+    }    
+    left = df[cols[0]]
+    for i, x in enumerate(math):
+        right = cols[i+1]
+        left = maths[x](left, right)
+    df[col] = left
+    print(df[col])
