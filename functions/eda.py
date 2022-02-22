@@ -30,23 +30,23 @@ async def get_columns(item: Request) -> str:
     return f"{list(pd.read_json(await item.json()).columns)}"
 
 
-async def get_unique(item: Request) -> str:
-    """입력이 Series의 JSON일 경우"""
-    try:
-        return f"{list(pd.read_json(await item.json()).unique())}"
-    except:
-        return "input JSON should be converted to pandas.Series"
+# async def get_unique(item: Request) -> str:
+#     """입력이 Series의 JSON일 경우"""
+#     try:
+#         return f"{list(pd.read_json(await item.json()).unique())}"
+#     except:
+#         return "input JSON should be converted to pandas.Series"
 
 
-async def get_unique_column(column: str, item: Request) -> str:
+async def get_unique(item: Request, col: str) -> str:
     """입력이 DataFrame의 JSON일 경우
 
     /file/unique/컬럼명 에서 컬럼명이 DataFrame에 없을 경우 에러메시지를 리턴한다."""
     df = pd.read_json(await item.json())
     try:
-        if column not in df.columns:
-            return f"{column} is not in columns of DataFrame. It should be in {list(df.columns)}"
-        return f"{list(df[column].unique())}"
+        if col not in df.columns:
+            return f"{col} is not in columns of DataFrame. It should be in {list(df.columns)}"
+        return f"{list(df[col].unique())}"
     except:
         return "input JSON should be converted to pandas.DataFrame"
 

@@ -16,9 +16,9 @@ async def set_transpose(item: Request) -> str:
 
 
 async def set_groupby(
-    func:       str,
     item:       Request,
     by:         str,
+    func:       str,
     *,
     axis:       Optional[str] = Query(0,       max_length=50),
     as_index:   Optional[str] = Query("True",  max_length=50), 
@@ -695,7 +695,39 @@ async def set_concat(
     ).to_json(orient="records")
 
 
-async def set_new_columns(
-
+async def set_column(
+    item: Request,
+    col : str,
+    *,
+    cols: Optional[str] = Query(None, max_length=50),
+    math: Optional[str] = Query(None, max_length=50),
+    func: Optional[str] = Query(None, max_length=50),
 ) -> str:
-    ...
+    
+    df = pd.read_json(await item.json())
+    cols = [i.strip() for i in cols.split(",") if i.strip() != ""]
+    math = [i.strip() for i in math.split(",") if i.strip() != ""]
+    # left: df[col], right: some function
+    # df[col] =
+
+    # cols = col1,col2,col3....
+    # math = + - x /
+    # func = sum, std, mean ...
+
+    # cols + math
+    # df[col] = (((df[col1] + df[col2]) - df[col3]) * df[col4])
+
+    maths = {
+        "add" : lambda x, y: x + y,
+        "mul" : lambda x, y: x * y,
+        "sub" : lambda x, y: x - y,
+        "isub": lambda x, y: y - x,
+        "div" : lambda x, y: x / y,
+        "idiv": lambda x, y: y / x,
+    }    
+    left = df[cols[0]]
+    for i, x in enumerate(math):
+        right = cols[i+1]
+        left = maths[x](left, right)
+    df[col] = left
+    print(df[col])

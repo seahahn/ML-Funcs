@@ -8,7 +8,7 @@ from functions.eda import (
     get_dtype,
     get_columns,
     get_unique,
-    get_unique_column,
+    # get_unique_column,
     get_na,
     get_corr,
     get_describe,
@@ -25,7 +25,8 @@ from functions.processing import (
     set_rename,
     set_sort_values,
     set_merge,
-    set_concat
+    set_concat,
+    set_column
 )
 
 __all__ = [
@@ -37,7 +38,7 @@ __all__ = [
     "get_dtype",
     "get_columns",
     "get_unique",
-    "get_unique_column",
+    # "get_unique_column",
     "get_na",
     "get_corr",
     "get_describe",
@@ -53,5 +54,7 @@ __all__ = [
     "set_sort_values",
     "set_merge",
     "set_concat",
+    "set_column",
+
     "box_plot"
 ]
