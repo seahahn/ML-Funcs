@@ -1,14 +1,18 @@
-from copy import copy
 from typing import Optional
-from fastapi import Body, Request, Query
+from fastapi import Request, Query
 import json
-import numpy as np
 import pandas as pd
+# import modin.pandas as pd
 
 
 def boolean(x):
     if   x.lower() == "true" : return True
     elif x.lower() == "false": return False
+
+
+# def split(x):
+#     try   : return [i.strip() for i in x.split(",") if i.strip() != ""]
+#     except: return False
 
 
 async def set_transpose(item: Request) -> str:
@@ -187,10 +191,10 @@ async def set_drop(
         labels = [i.strip() for i in labels.split(",") if i.strip() != ""]
         if errors == "raise":
             if axis: 
-                cols = df.columns
-                if str(cols.dtype) != "object": labels = [int(i) for i in labels]
-                cols = set(cols)
-                error_list = [i for i in labels if i not in cols]
+                dfcols = df.columns
+                if str(dfcols.dtype) != "object": labels = [int(i) for i in labels]
+                dfcols = set(dfcols)
+                error_list = [i for i in labels if i not in dfcols]
             else:
                 idxs = df.index
                 if str(idxs.dtype) != "object": labels = [int(i) for i in labels]
@@ -644,10 +648,8 @@ async def set_concat(
     #      1    d
     #  dtype: object
     if keys is not None:
-        try:
-            keys = [i.strip() for i in keys.split(",") if i.strip() != ""]
-        except:
-            return '"keys" should be string array(grouped index names) divied by ","'
+        try   : keys = [i.strip() for i in keys.split(",") if i.strip() != ""]
+        except: return '"keys" should be string array(grouped index names) divied by ","'
 
     ## levels
     # 멀티인덱스 사용할 때 필요함. 추후 구현 예정
@@ -662,10 +664,8 @@ async def set_concat(
     #              | 1         d
     #  dtype: object
     if names is not None:
-        try:
-            names = [i.strip() for i in names.split(",") if i.strip() != ""]
-        except:
-            return '"names" should be string array(grouped index`s column names) divied by ","'
+        try   : names = [i.strip() for i in names.split(",") if i.strip() != ""]
+        except: return '"names" should be string array(grouped index`s column names) divied by ","'
 
     ## veri_integ => verify_integrity
     #  Check whether the new concatenated axis contains duplicates. 
@@ -765,7 +765,8 @@ async def set_column(
         deq = deque()
 
         if cols_ops:
-            cols_ops = [i.strip() for i in cols_ops.split(",") if i.strip() != ""]
+            try   : cols_ops = [i.strip() for i in cols_ops.split(",") if i.strip() != ""]
+            except: return '"cols_ops" should be array(column names and operators) divied by ","'
             for i, v in enumerate(cols_ops):
                 if i%2 == 0:
                     if v in dfcols: deq.append(df[v]) # df columns이면 시리즈로
@@ -812,7 +813,8 @@ async def set_column(
                 except: return "column type is int. cols should be int."
         else:
             if cols is not None:
-                cols = [i.strip() for i in cols.split(",") if i.strip() != ""]
+                try   : cols = [i.strip() for i in cols.split(",") if i.strip() != ""]
+                except: return '"cols" should be array(column names) divied by ","'
 
 
         if cols     and not set(cols)<= dfcols: return f'"{cols}" is not in columns of DataFrame. It should be in {dfcols}'
@@ -834,4 +836,13 @@ async def set_column(
         df[col] = functions[func](df_func)(axis=1)
 
     return df.to_json(orient="records")
-        
+
+
+async def set_astype(item: Request, col:str, dtype:str) -> str:
+    if dtype not in ["int", "float", "category", "object"]:
+        return f"{dtype}: 올바르지 않은 데이터 타입"
+    df = pd.read_json(await item.json())
+    if col not in set(df.columns):
+        return f"{col}: 존재하지 않는 컬럼"
+    df[col] = df[col].astype(dtype)
+    return df.to_json(orient="records")
