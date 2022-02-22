@@ -51,6 +51,13 @@ from functions import (
     set_column
 )
 
+from visualization import (
+    box_plot,
+    hist_plot,
+    count_plot,
+    scatter_plot
+    )
+
 create_upload_file = app.post("/uploadfile")               (create_upload_file)
 get_head           = app.post("/dataframe/head")           (get_head)
 get_tail           = app.post("/dataframe/tail")           (get_tail)
@@ -69,12 +76,6 @@ get_iloc           = app.post("/dataframe/iloc")           (get_iloc)
 
 
 
-
-from functions import (box_plot)
-
-box_plot = app.get("/plot/boxplot")(box_plot)
-
-
 set_transpose      = app.post("/dataframe/transpose")      (set_transpose)
 set_groupby        = app.post("/dataframe/groupby")        (set_groupby)
 set_drop           = app.post("/dataframe/drop")           (set_drop)
@@ -85,3 +86,11 @@ set_sort_values    = app.post("/dataframe/sort_values")    (set_sort_values)
 set_merge          = app.post("/dataframe/merge")          (set_merge)
 set_concat         = app.post("/dataframe/concat")         (set_concat)
 set_column         = app.post("/dataframe/set_column")     (set_column)
+
+
+box_plot = app.get("/plot/boxplot")(box_plot)
+hist_plot = app.get("/plot/histplot")(hist_plot)
+count_plot = app.get("/plot/countplot")(count_plot)
+scatter_plot = app.get("/plot/scatterplot")(scatter_plot)
+
+
