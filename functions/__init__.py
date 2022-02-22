@@ -1,9 +1,8 @@
 from functions.data2json import create_upload_file
-from functions.AI_plot import (box_plot)
 
 from functions.eda import (
-    get_head, 
-    get_tail, 
+    get_head,
+    get_tail,
     get_shape,
     get_dtype,
     get_columns,
@@ -12,7 +11,7 @@ from functions.eda import (
     get_na,
     get_corr,
     get_describe,
-    
+
 )
 from functions.processing import (
     set_transpose,
@@ -26,9 +25,9 @@ from functions.processing import (
 )
 
 __all__ = [
-    "create_upload_file", 
-    "get_head", 
-    "get_tail", 
+    "create_upload_file",
+    "get_head",
+    "get_tail",
     "get_shape",
     "get_dtype",
     "get_columns",
@@ -45,5 +44,4 @@ __all__ = [
     "set_sort_values",
     "set_merge",
     "set_concat",
-    "box_plot"
 ]

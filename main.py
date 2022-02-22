@@ -46,6 +46,13 @@ from functions import (
     set_concat
 )
 
+from visualization import (
+    box_plot,
+    hist_plot,
+    count_plot,
+    scatter_plot
+    )
+
 create_upload_file = app.post("/uploadfile")          (create_upload_file)
 get_head           = app.post("/file/head")           (get_head)
 get_tail           = app.post("/file/tail")           (get_tail)
@@ -59,9 +66,7 @@ get_corr           = app.post("/file/corr")           (get_corr)
 get_describe       = app.post("/file/describe")       (get_describe)
 
 
-from functions import (box_plot)
 
-box_plot = app.get("/plot/boxplot")(box_plot)
 
 set_transpose      = app.post("/file/transpose")      (set_transpose)
 set_groupby        = app.post("/file/groupby/{func}") (set_groupby)
@@ -72,3 +77,10 @@ set_sort_values    = app.post("/file/sort/values")    (set_sort_values)
 # set_sort_index     = app.post("/file/sort/index")     (set_sort_index)
 set_merge          = app.post("/file/merge")          (set_merge)
 set_concat         = app.post("/file/concat")         (set_concat)
+
+
+
+box_plot = app.get("/plot/boxplot")(box_plot)
+hist_plot = app.get("/plot/histplot")(hist_plot)
+count_plot = app.get("/plot/countplot")(count_plot)
+scatter_plot = app.get("/plot/scatterplot")(scatter_plot)
