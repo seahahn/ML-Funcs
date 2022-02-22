@@ -695,39 +695,143 @@ async def set_concat(
     ).to_json(orient="records")
 
 
+from collections import deque
+
 async def set_column(
-    item: Request,
-    col : str,
+    item    : Request,
+    col     : str,
     *,
-    cols: Optional[str] = Query(None, max_length=50),
-    math: Optional[str] = Query(None, max_length=50),
-    func: Optional[str] = Query(None, max_length=50),
+    cols    : Optional[str] = Query(None, max_length=50), # for func
+    col_from: Optional[str] = Query(None, max_length=50), # for func
+    col_to  : Optional[str] = Query(None, max_length=50), # for func
+    func    : Optional[str] = Query(None, max_length=50),
+    cols_ops: Optional[str] = Query(None, max_length=50),
 ) -> str:
+    """
+    ```
+    item은 입력받을 dataframe,
+    col은 새로 생성 또는 값을 변경할 컬럼 명.(기존 컬럼에 있으면 기존 컬럼을 변경하고 아니면 새로 생성)
+
+    사용 방법 2가지
+    1. cols or col_from:col_to / func
+    2. cols_ops
+
+    둘 다 동시에 사용할 수 없음
+
     
+    ※ func 사용시 유의사항
+    1. cols 를 사용하면 col_from:col_to 는 사용할 수 없습니다. 둘 중 하나 사용 가능
+    2. func는 다음 중 하나여야 합니다. ["sum", "count", "mean", "min", "max", "std", "median", "size"]
+
+
+    ※ cols_ops 사용시 유의사항
+    1. column 명이 숫자일 경우, 컬럼을 연산하라는 것인지 숫자를 연산하라는 것인지 구분이 불가능합니다.
+    (키워드 약속하면 구분해서 처리할 수는 있습니다.)
+    2. + => %2b 로 파라미터를 보내셔야합니다
+    3. 반드시 column 또는 숫자로 시작해서 column 또는 숫자로 끝나야 합니다.
+    4. 홀수 자리는 반드시 연산자가 와야 합니다.(^, /, *, -, +)
+    ```
+    Args:
+    ```
+    item     (Request, required): JSON
+    col      (str,     required): 새로 생성하거나 변경할 컬럼 명
+    *
+    cols     (str,     optional) = Default: None, 쉼표로 구분된 컬럼명(반드시 df에 포함되어 있어야 함) funt 쓸 때 사용
+    col_from (str,     optional) = Default: None, funt 쓸 때 사용
+    col_to   (str,     optional) = Default: None, funt 쓸 때 사용
+    func     (str,     optional) = Default: None, ["sum", "count", "mean", "min", "max", "std", "median", "size"] 중 하나
+    cols_ops (str,     optional) = Default: None, 쉼표로 구분된 컬럼or숫자와 연산자(^, /, *, -, +)
+    ```
+    Returns:
+    ```
+    str: JSON
+    ```
+    """
     df = pd.read_json(await item.json())
-    cols = [i.strip() for i in cols.split(",") if i.strip() != ""]
-    math = [i.strip() for i in math.split(",") if i.strip() != ""]
+    dfcols = set(df.columns)
     # left: df[col], right: some function
     # df[col] =
 
-    # cols = col1,col2,col3....
-    # math = + - x /
-    # func = sum, std, mean ...
+    if cols_ops:
+        # cols_ops
+        operators = {
+            "^" : lambda x, y: x ** y,
+            "/" : lambda x, y: x / y,
+            "*" : lambda x, y: x * y,
+            "-" : lambda x, y: x - y,
+            "+" : lambda x, y: x + y,
+        }
 
-    # cols + math
-    # df[col] = (((df[col1] + df[col2]) - df[col3]) * df[col4])
+        deq = deque()
 
-    maths = {
-        "add" : lambda x, y: x + y,
-        "mul" : lambda x, y: x * y,
-        "sub" : lambda x, y: x - y,
-        "isub": lambda x, y: y - x,
-        "div" : lambda x, y: x / y,
-        "idiv": lambda x, y: y / x,
-    }    
-    left = df[cols[0]]
-    for i, x in enumerate(math):
-        right = cols[i+1]
-        left = maths[x](left, right)
-    df[col] = left
-    print(df[col])
+        if cols_ops:
+            cols_ops = [i.strip() for i in cols_ops.split(",") if i.strip() != ""]
+            for i, v in enumerate(cols_ops):
+                if i%2 == 0:
+                    if v in dfcols: deq.append(df[v]) # df columns이면 시리즈로
+                    else : 
+                        try   : deq.append(float(v))  # 아니면 그냥 numeric으로
+                        except: return f'"{v}" is not in columns of DataFrame. It should be in {dfcols}'
+                else:
+                    deq.append(v)
+
+        for op in operators:    # 모든 연산자에 대해 우선순위 대로
+            cols_ops = deq
+            deq = deque()
+            while len(cols_ops) != 0:
+                cur = cols_ops.popleft()
+                if type(cur) is str and cur == op:
+                    left = deq.pop()
+                    right = cols_ops.popleft()
+                    cur = operators[cur](left, right)
+                deq.append(cur)
+        
+        df[col] = deq.pop()
+
+    else:
+        ## func
+        func_list = ["sum", "count", "mean", "min", "max", "std", "median", "size"]
+        func = func.lower()
+        if not func in func_list:
+            return f'"{func}" is invalid function. "func" should be in {func_list}'
+        
+        # cols = col1,col2,col3....
+        # math = + - x /
+        # func = sum, std, mean ...
+        if str(df.columns.dtype) == "int64":
+            if cols is None:
+                if col_from is not None: 
+                    try   : col_from = int(col_from)
+                    except: return "column type is int. col_from should be int."
+                if col_to is not None: 
+                    try   : col_to = int(col_to)
+                    except: return "column type is int. col_to should be int."
+            else:
+                col_from = col_to = None
+                try   : cols = [int(i) for i in cols.split(",") if i.strip() != ""]
+                except: return "column type is int. cols should be int."
+        else:
+            if cols is not None:
+                cols = [i.strip() for i in cols.split(",") if i.strip() != ""]
+
+
+        if cols     and not set(cols)<= dfcols: return f'"{cols}" is not in columns of DataFrame. It should be in {dfcols}'
+        if col_from and col_from not in dfcols: return f'"{col_from}" is not in columns of DataFrame. It should be in {dfcols}'
+        if col_to   and col_to   not in dfcols: return f'"{col_to}" is not in columns of DataFrame. It should be in {dfcols}'
+
+        functions = {
+            "sum"   : lambda x: x.sum,
+            "count" : lambda x: x.count,
+            "mean"  : lambda x: x.mean,
+            "min"   : lambda x: x.min,
+            "max"   : lambda x: x.max,
+            "std"   : lambda x: x.std,
+            "median": lambda x: x.median,
+            "size"  : lambda x: x.size
+        }
+
+        df_func = df[cols] if cols else df[:,col_from:col_to]
+        df[col] = functions[func](df_func)(axis=1)
+
+    return df.to_json(orient="records")
+        
