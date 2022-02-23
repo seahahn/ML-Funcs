@@ -67,7 +67,9 @@ async def get_na(item: Request, *, sum: Optional[str] = Query("false", max_lengt
     (str): JSON
     ```
     """
-    if   sum.lower() == "true" : return pd.read_json(await item.json()).isna().sum().to_json(orient="records")
+    if   sum.lower() == "true" : 
+        return pd.read_json(await item.json()).isna().sum().reset_index(name='NumOfNaN')\
+            .rename(columns={"index":"Column"}).to_json(orient="records", default_handler=str)
     elif sum.lower() == "false": return pd.read_json(await item.json()).isna().to_json(orient="records")
     else                       : return "sum은 true or false를 넣으셔야 합니다."
 
@@ -118,21 +120,21 @@ async def get_corr(
     if col2 and col2 not in dfcols: return f"{col2} is not in columns of DataFrame. It should be in {dfcols}"
     
     if col1 and col2:
-        return json.dumps(df[col1].corr(
+        return df[col1].corr(
             other       = df[col2],
             method      = method, 
             min_periods = req_min
-        ))
+        )
     elif col1:
         return df.corr(
             method      = method, 
             min_periods = req_min
-        )[col1].to_json(orient="records")
+        )[col1].reset_index(name=col1).rename(columns={"index":"Column"}).to_json(orient="records", default_handler=str)
     elif col2:
         return df.corr(
             method      = method, 
             min_periods = req_min
-        )[col2].to_json(orient="records")
+        )[col2].reset_index(name=col2).rename(columns={"index":"Column"}).to_json(orient="records", default_handler=str)
     else:
         return df.corr(
             method      = method, 
@@ -184,9 +186,15 @@ async def get_describe(
     ```
     """
 
-
-    try:    percentiles = [float(i) for i in percentiles.split(",") if i.strip() != ""] if percentiles else None
-    except: return "percentiles should be 0~1 float string divided by ','"
+    if percentiles is not None:
+        try:
+            percentiles = [float(i) for i in percentiles.split(",") if i.strip() != ""] 
+            for i, f in enumerate(percentiles):
+                if 100 > f >= 1:
+                    percentiles[i] = f/100
+                elif not (1 > f > 0):
+                    return "percentiles should be 0~1 float string divided by ','"
+        except: return "percentiles should be 0~1 float string divided by ','"
 
     try:
         num = int(num)
@@ -252,7 +260,7 @@ async def get_describe(
         include             = include if include else None,
         exclude             = exclude if exclude else None,
         datetime_is_numeric = True if date2num.lower() == "true" else False
-    ).to_json(orient="records")
+    ).reset_index().rename(columns={"index":"Info"}).to_json(orient="records")
 
 
 async def get_col_condition(
