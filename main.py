@@ -48,7 +48,10 @@ from functions import (
     set_sort_values,
     set_merge,
     set_concat,
-    set_column
+    set_column,
+
+    set_feature_target_split,
+    set_train_test_split,
 )
 
 from visualization import (
@@ -73,9 +76,6 @@ get_col_condition  = app.post("/dataframe/col_condition")  (get_col_condition)
 get_loc            = app.post("/dataframe/loc")            (get_loc)
 get_iloc           = app.post("/dataframe/iloc")           (get_iloc)
 
-
-
-
 set_transpose      = app.post("/dataframe/transpose")      (set_transpose)
 set_groupby        = app.post("/dataframe/groupby")        (set_groupby)
 set_drop           = app.post("/dataframe/drop")           (set_drop)
@@ -86,6 +86,10 @@ set_sort_values    = app.post("/dataframe/sort_values")    (set_sort_values)
 set_merge          = app.post("/dataframe/merge")          (set_merge)
 set_concat         = app.post("/dataframe/concat")         (set_concat)
 set_column         = app.post("/dataframe/set_column")     (set_column)
+
+set_feature_target_split = app.post("/dataframe/feature_target_split")(set_feature_target_split)
+set_train_test_split     = app.post("/dataframe/train_test_split")    (set_train_test_split)
+
 
 
 box_plot = app.get("/plot/boxplot")(box_plot)
