@@ -104,6 +104,11 @@ async def get_corr(
     (str): JSON
     ```
     """
+    method  = "pearson" if method  == "" else method
+    req_min = 1         if req_min == "" else req_min
+    col1    = None      if col1    == "" else col1
+    col2    = None      if col2    == "" else col2
+
     if not method in ["pearson", "kendall", "spearman"]:
         return 'method should be in ["pearson", "kendall", "spearman"]'
     
@@ -185,6 +190,13 @@ async def get_describe(
     (str): JSON
     ```
     """
+    percentiles = None if percentiles == "" else percentiles
+    num         = 0    if num         == "" else num
+    obj         = 0    if obj         == "" else obj
+    cat         = 0    if cat         == "" else cat
+    date        = 0    if date        == "" else date
+    date2num    = ""   if date2num    == "" else date2num
+
 
     if percentiles is not None:
         try:
@@ -308,6 +320,11 @@ async def get_col_condition(
     str: JSON
     ```
     """
+    cond1  = None if cond1  == "" else cond1
+    value1 = None if value1 == "" else value1
+    cond2  = None if cond2  == "" else cond2
+    value2 = None if value2 == "" else value2
+
     df = pd.read_json(await item.json())
     
     if cond1 not in ["eq", "gr", "gr_eq", "le", "le_eq"]:
@@ -399,6 +416,13 @@ async def get_loc(
     str: JSON
     ```
     """
+    idx       = None if idx      == "" else idx
+    idx_from  = None if idx_from == "" else idx_from
+    idx_to    = None if idx_to   == "" else idx_to
+    cols      = None if cols     == "" else cols
+    col_from  = None if col_from == "" else col_from
+    col_to    = None if col_to   == "" else col_to
+
     df = pd.read_json(await item.json())
 
     if str(df.index.dtype) == "int64":
@@ -488,6 +512,13 @@ async def get_iloc(
     str: JSON
     ```
     """
+    idx       = None if idx      == "" else idx
+    idx_from  = None if idx_from == "" else idx_from
+    idx_to    = None if idx_to   == "" else idx_to
+    cols      = None if cols     == "" else cols
+    col_from  = None if col_from == "" else col_from
+    col_to    = None if col_to   == "" else col_to
+    
     df = pd.read_json(await item.json())
 
     if idx is None: 

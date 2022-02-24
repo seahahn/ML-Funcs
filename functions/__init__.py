@@ -28,6 +28,11 @@ from functions.processing import (
     set_column
 )
 
+from functions.preprocessing import (
+    set_feature_target_split,
+    set_train_test_split,
+)
+
 __all__ = [
     "create_upload_file", 
 
@@ -54,4 +59,7 @@ __all__ = [
     "set_merge",
     "set_concat",
     "set_column",
+
+    "set_feature_target_split",
+    "set_train_test_split",
 ]

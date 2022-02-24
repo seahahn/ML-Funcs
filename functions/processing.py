@@ -59,6 +59,12 @@ async def set_groupby(
     str: JSON
     ```
     """
+    axis       = 0       if axis       == "" else axis
+    as_index   = "True"  if as_index   == "" else as_index
+    sort       = "True"  if sort       == "" else sort
+    group_keys = "True"  if group_keys == "" else group_keys
+    observed   = "False" if observed   == "" else observed
+    dropna     = "True"  if dropna     == "" else dropna
 
     ## func
     func_list = ["sum", "count", "mean", "min", "max", "std", "median", "size"]
@@ -170,6 +176,10 @@ async def set_drop(
     str: JSON
     ```
     """
+
+    axis   = 0       if axis   == "" else axis
+    errors = "raise" if errors == "" else errors
+
     ## errors
     errors = errors.lower()
     if errors not in ["raise", "ignore"]:
@@ -242,6 +252,12 @@ async def set_dropna(
     str: JSON
     ```
     """
+
+    axis   = 0     if axis   == "" else axis
+    how    = 'any' if how    == "" else how
+    thresh = None  if thresh == "" else thresh
+    subset = None  if subset == "" else subset
+
     ## axis
     try:
         axis = int(axis)
@@ -320,6 +336,9 @@ async def set_rename(
     str: JSON
     ```
     """
+    copy   = "true"   if copy   == "" else copy
+    errors = "ignore" if errors == "" else errors
+
     df = pd.read_json(await item.json())
 
     ## keys
@@ -394,6 +413,13 @@ async def set_sort_values(
     str: JSON
     ```
     """
+    axis   = 0           if axis   == "" else axis
+    ascd   = "true"      if ascd   == "" else ascd
+    kind   = "quicksort" if kind   == "" else kind
+    na_pos = "last"      if na_pos == "" else na_pos
+    ig_idx = "false"     if ig_idx == "" else ig_idx
+    key    = None        if key    == "" else key
+
     df = pd.read_json(await item.json())
 
     ## by
@@ -487,6 +513,19 @@ async def set_merge(
     str: JSON
     ```
     """
+    how         = "inner" if how         == "" else how
+    on          = None    if on          == "" else on
+    left_on     = None    if left_on     == "" else left_on
+    right_on    = None    if right_on    == "" else right_on
+    left_index  = "false" if left_index  == "" else left_index
+    right_index = "false" if right_index == "" else right_index
+    sort        = "false" if sort        == "" else sort
+    left_suf    = "_x"    if left_suf    == "" else left_suf
+    right_suf   = "_y"    if right_suf   == "" else right_suf
+    copy        = "true"  if copy        == "" else copy
+    indicator   = "false" if indicator   == "" else indicator
+    validate    = None    if validate    == "" else validate
+
     js = json.loads(await item.json())
     df1 = pd.DataFrame(js["item1"])
     df2 = pd.DataFrame(js["item2"])
@@ -616,6 +655,16 @@ async def set_concat(
     str: JSON
     ```
     """
+    axis       = 0       if axis       == "" else axis
+    join       = "outer" if join       == "" else join
+    ig_idx     = "false" if ig_idx     == "" else ig_idx
+    keys       = None    if keys       == "" else keys
+    # levels     = None    if levels     == "" else levels
+    names      = None    if names      == "" else names
+    veri_integ = "false" if veri_integ == "" else veri_integ
+    sort       = "false" if sort       == "" else sort
+    copy       = "true"  if copy       == "" else copy
+
     js = json.loads(await item.json())
     df1 = pd.DataFrame(js["item1"])
     df2 = pd.DataFrame(js["item2"])
@@ -747,6 +796,12 @@ async def set_column(
     str: JSON
     ```
     """
+    cols     = None if cols     == "" else cols
+    col_from = None if col_from == "" else col_from
+    col_to   = None if col_to   == "" else col_to
+    func     = None if func     == "" else func
+    cols_ops = None if cols_ops == "" else cols_ops
+
     df = pd.read_json(await item.json())
     dfcols = set(df.columns)
     # left: df[col], right: some function
