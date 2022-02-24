@@ -55,7 +55,7 @@ async def set_train_test_split(
     train_size  : Optional[str] = Query(None,   max_length=50),
     random_state: Optional[str] = Query(None,   max_length=50),
     shuffle     : Optional[str] = Query("true", max_length=50),
-    stratify    : Optional[str] = Query("y",   max_length=50),
+    stratify    : Optional[str] = Query(None,   max_length=50),
 ) -> str:
     """
     ```python
@@ -63,16 +63,17 @@ async def set_train_test_split(
     
     # 입력 item은 X 와 y 키에 각각 데이터 프레임이 들어있어야 함.
     # test_size와 train_size는 둘 중 하나만 입력 가능.
+    # stratify는 None 또는 'y'만 가능
     ```
     Args:
     ```
     item         (Request, required): JSON, {"X":X_dataframe, "y":y_dataframe}
     *,
-    test_size    (str,     optional): Default = None, 0~1 사이의 소수. 테스트 셋의 비율
-    train_size   (str,     optional): Default = None, 0~1 사이의 소수. 트레인 셋의 비율
-    random_state (str,     optional): Default = None, 아무 정수. 랜덤 시드
-    shuffle      (str,     optional): Default = True, 셔플 여부. true 셔플함, false, 셔플 안함
-    stratify     (str,     optional): Default = "y", 타겟을 지정. 보통 건드릴 일 X
+    test_size    (str,     optional): Default = None,   0~1 사이의 소수. 테스트 셋의 비율
+    train_size   (str,     optional): Default = None,   0~1 사이의 소수. 트레인 셋의 비율
+    random_state (str,     optional): Default = None,   아무 정수. 랜덤 시드
+    shuffle      (str,     optional): Default = "true", 셔플 여부. true 셔플함, false, 셔플 안함
+    stratify     (str,     optional): Default = None,   타겟을 지정. train, valid split할 때 y를 입력하면 됨.
     ```
     Returns:
     ```
@@ -89,7 +90,7 @@ async def set_train_test_split(
     train_size   = None   if train_size   == "" else train_size
     random_state = None   if random_state == "" else random_state
     shuffle      = "true" if shuffle      == "" else shuffle
-    stratify     = "y"    if stratify     == "" else stratify
+    stratify     = None   if stratify     == "" else stratify
 
     dfs = await item.json()
     X = pd.read_json(dfs["X"])
@@ -145,8 +146,6 @@ async def set_train_test_split(
     # shuffle  = False,
     # stratify = None
 
-    # how to return?
-    # 1안 
     return json.dumps( {
         "X_train": X_train.to_json(orient="records"),
         "X_test" : X_test.to_json(orient="records"),
