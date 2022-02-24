@@ -341,7 +341,8 @@ async def get_col_condition(
         if cond1 is None: return '"cond1" should be used.'
         try   : value1 = float(value1)
         except: return '"value1" should be numeric(int or float).'
-    
+    else:
+        return '"value1" should be used.'
         
 
     if value2 is not None: 
