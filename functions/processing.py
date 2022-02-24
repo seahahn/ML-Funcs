@@ -526,9 +526,9 @@ async def set_merge(
     indicator   = "false" if indicator   == "" else indicator
     validate    = None    if validate    == "" else validate
 
-    js = json.loads(await item.json())
-    df1 = pd.DataFrame(js["item1"])
-    df2 = pd.DataFrame(js["item2"])
+    item = json.loads(await item.json())
+    df_left = pd.DataFrame(item["left"])
+    df_right = pd.DataFrame(item["right"])
 
     ## how
     if how not in {"left", "right", "outer", "inner", "cross"}:
@@ -541,10 +541,10 @@ async def set_merge(
     if on is not None:
         try:
             on = [i.strip() for i in on.split(",") if i.strip() != ""]
-            error_list = [i for i in on if i not in df1.columns]
+            error_list = [i for i in on if i not in df_left.columns]
             if error_list:
                 return f'"on" should be string array(column names) divied by ","\nlist not in DataFrame1 columns: {error_list}'
-            error_list = [i for i in on if i not in df2.columns]
+            error_list = [i for i in on if i not in df_right.columns]
             if error_list:
                 return f'"on" should be string array(column names) divied by ","\nlist not in DataFrame2 columns: {error_list}'
         except:
@@ -554,7 +554,7 @@ async def set_merge(
     if left_on is not None:
         try:
             left_on = [i.strip() for i in left_on.split(",") if i.strip() != ""]
-            error_list = [i for i in left_on if i not in df1.columns]
+            error_list = [i for i in left_on if i not in df_left.columns]
             if error_list:
                 return f'"left_on" should be string array(column names) divied by ","\nlist not in DataFrame1 columns: {error_list}'
         except:
@@ -564,7 +564,7 @@ async def set_merge(
     if right_on is not None:
         try:
             right_on = [i.strip() for i in right_on.split(",") if i.strip() != ""]
-            error_list = [i for i in right_on if i not in df2.columns]
+            error_list = [i for i in right_on if i not in df_right.columns]
             if error_list:
                 return f'"on" should be string array(column names) divied by ","\nlist not in DataFrame2 columns: {error_list}'
         except:
@@ -603,8 +603,8 @@ async def set_merge(
         if validate not in {"1:1", "1:m", "m:1", "m:m", "one_to_one", "one_to_many", "many_to_one", "many_to_many"}:
             return f'"validate" should be ["1:1", "1:m", "m:1", "m:m", "one_to_one", "one_to_many", "many_to_one", "many_to_many"]. current validate = {validate}'
 
-    return df1.merge(
-        right        = df2,
+    return df_left.merge(
+        right        = df_right,
         how          = how,
         on           = on,          #: IndexLabel | None = None,
         left_on      = left_on,     #: IndexLabel | None = None,
@@ -665,12 +665,12 @@ async def set_concat(
     sort       = "false" if sort       == "" else sort
     copy       = "true"  if copy       == "" else copy
 
-    js = json.loads(await item.json())
-    df1 = pd.DataFrame(js["item1"])
-    df2 = pd.DataFrame(js["item2"])
+    item = json.loads(await item.json())
+    df_left = pd.DataFrame(item["left"])
+    df_right = pd.DataFrame(item["right"])
 
-    if type(df1) == type(df2) == pd.DataFrame:
-        objs = [df1, df2]
+    if type(df_left) == type(df_right) == pd.DataFrame:
+        objs = [df_left, df_right]
     else:
         return "merge must be needed two DataFrame"
     
