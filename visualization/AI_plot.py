@@ -8,7 +8,7 @@ import pandas as pd
 # import modin.pandas as pd
 import json
 from bokeh.plotting import figure
-from bokeh.embed import components, file_html, json_item
+from bokeh.embed import json_item
 from bokeh.resources import CDN
 from fastapi.templating import Jinja2Templates
 import re
@@ -135,7 +135,6 @@ async def hist_plot(
         }
 
     #해당 특성의 데이터를 히스토그램으로 변환
-
     hist, edges = np.histogram(df[col], density=True, bins=50) # 데이터셋에 결측치 존재 시 오류 발생
     plot = figure(tools=tools, background_fill_color="#fafafa")
     plot.quad(top=hist, bottom=0, left=edges[:-1], right=edges[1:], fill_color="navy", line_color="white", alpha=0.5)
