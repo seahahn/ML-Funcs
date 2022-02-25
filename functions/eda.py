@@ -90,6 +90,8 @@ async def get_corr(
     col1, col2는 데이터가 클 때, 보고 싶은 데이터만 볼수 있는 기능입니다.
     col1, col2 둘 다 입력: 두 columns의 상관관계만 리턴
     col1, col2 둘 중 하나: 해당 column과 나머지의 상관관계를 리턴
+
+    인덱스를 살려야 함.
     ```
     Args:
     ```
@@ -144,7 +146,7 @@ async def get_corr(
         return df.corr(
             method      = method, 
             min_periods = req_min
-        ).to_json(orient="records")
+        ).reset_index().rename(columns={"index":""}).to_json(orient="records")
 
 
 async def get_describe(

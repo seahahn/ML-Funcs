@@ -30,7 +30,7 @@ async def set_groupby(
     group_keys: Optional[str] = Query("True",  max_length=50), 
     observed:   Optional[str] = Query("False", max_length=50), 
     dropna:     Optional[str] = Query("True",  max_length=50)
-    # level:      Optional[str] = Query(None,  max_length=50), # MultiIndex 에서 사용하는 것! 
+    # level:      Optional[str] = Query(None,    max_length=50), # MultiIndex 에서 사용하는 것! 
 ) -> str:
     """pandas.DataFrame.groupby(by).func() 결과를 리턴하는 함수
     ```
@@ -142,7 +142,7 @@ async def set_groupby(
         "size"  : df_group.size
     }
     
-    return functions[func]().to_json(orient="records")
+    return functions[func]().reset_index().to_json(orient="records")
 
 
 async def set_drop(
