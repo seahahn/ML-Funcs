@@ -4,6 +4,15 @@ import json
 import pandas as pd
 # import modin.pandas as pd
 
+FUNCTIONS = {
+    "sum"   : lambda x: x.sum,
+    "count" : lambda x: x.count,
+    "mean"  : lambda x: x.mean,
+    "min"   : lambda x: x.min,
+    "max"   : lambda x: x.max,
+    "std"   : lambda x: x.std,
+    "median": lambda x: x.median,
+}
 
 def boolean(x):
     if   x.lower() == "true" : return True
@@ -34,7 +43,7 @@ async def set_groupby(
 ) -> str:
     """pandas.DataFrame.groupby(by).func() 결과를 리턴하는 함수
     ```
-    available function = sum, count, mean, min, max, std, median, size
+    available function = sum, count, mean, min, max, std, median
     by는 반드시 존재하는 컬럼명을 쉼표로 구분해서 입력해야 한다. 1개만 입력할 경우 쉽표 X
     axis = 0(row), 1(columns)
     as_index, sort, group_keys, observed, dropna = bool. true나 false가 입력되어야 한다.
@@ -43,7 +52,7 @@ async def set_groupby(
     ```
     Args:
     ```
-    func       (str,     required): should be in [sum, count, mean, min, max, std, median, size]
+    func       (str,     required): should be in [sum, count, mean, min, max, std, median]
     item       (Request, required): JSON
     by         (str,     required): should be string array(column names) divied by ","
     *
@@ -67,10 +76,9 @@ async def set_groupby(
     dropna     = "True"  if dropna     == "" else dropna
 
     ## func
-    func_list = ["sum", "count", "mean", "min", "max", "std", "median", "size"]
     func = func.lower()
-    if not func in func_list:
-        return f'"{func}" is invalid function. "func" should be in {func_list}'
+    if not func in FUNCTIONS:
+        return f'"{func}" is invalid function. "func" should be in {FUNCTIONS}'
     
     df = pd.read_json(await item.json())
 
@@ -131,18 +139,7 @@ async def set_groupby(
         dropna     = dropna
     )
     
-    functions = {
-        "sum"   : df_group.sum,
-        "count" : df_group.count,
-        "mean"  : df_group.mean,
-        "min"   : df_group.min,
-        "max"   : df_group.max,
-        "std"   : df_group.std,
-        "median": df_group.median,
-        "size"  : df_group.size
-    }
-    
-    return functions[func]().reset_index().to_json(orient="records")
+    return FUNCTIONS[func](df_group).reset_index().to_json(orient="records")
 
 
 async def set_drop(
@@ -431,6 +428,13 @@ async def set_sort_values(
     except:
         return '"by" should be string array(column names) divied by ","'
     
+    ## axis
+    try:
+        axis = int(axis)
+        if axis not in [0, 1]: return '"axis" should be 0, 1. row(0), column(1)'
+    except:
+        return '"axis" should be 0, 1. row(0), column(1)'
+
     ## ascd: ascending
     ascd = boolean(ascd)
     if ascd is None: return '"ascd: ascending" should be bool, "true" or "false"'
@@ -770,7 +774,7 @@ async def set_column(
     
     ※ func 사용시 유의사항
     1. cols 를 사용하면 col_from:col_to 는 사용할 수 없습니다. 둘 중 하나 사용 가능
-    2. func는 다음 중 하나여야 합니다. ["sum", "count", "mean", "min", "max", "std", "median", "size"]
+    2. func는 다음 중 하나여야 합니다. ["sum", "count", "mean", "min", "max", "std", "median"]
 
 
     ※ cols_ops 사용시 유의사항
@@ -788,7 +792,7 @@ async def set_column(
     cols     (str,     optional) = Default: None, 쉼표로 구분된 컬럼명(반드시 df에 포함되어 있어야 함) funt 쓸 때 사용
     col_from (str,     optional) = Default: None, funt 쓸 때 사용
     col_to   (str,     optional) = Default: None, funt 쓸 때 사용
-    func     (str,     optional) = Default: None, ["sum", "count", "mean", "min", "max", "std", "median", "size"] 중 하나
+    func     (str,     optional) = Default: None, ["sum", "count", "mean", "min", "max", "std", "median"] 중 하나
     cols_ops (str,     optional) = Default: None, 쉼표로 구분된 컬럼or숫자와 연산자(^, /, *, -, +)
     ```
     Returns:
@@ -846,10 +850,9 @@ async def set_column(
 
     else:
         ## func
-        func_list = ["sum", "count", "mean", "min", "max", "std", "median", "size"]
         func = func.lower()
-        if not func in func_list:
-            return f'"{func}" is invalid function. "func" should be in {func_list}'
+        if not func in FUNCTIONS:
+            return f'"{func}" is invalid function. "func" should be in {FUNCTIONS}'
         
         # cols = col1,col2,col3....
         # math = + - x /
@@ -876,19 +879,10 @@ async def set_column(
         if col_from and col_from not in dfcols: return f'"{col_from}" is not in columns of DataFrame. It should be in {dfcols}'
         if col_to   and col_to   not in dfcols: return f'"{col_to}" is not in columns of DataFrame. It should be in {dfcols}'
 
-        functions = {
-            "sum"   : lambda x: x.sum,
-            "count" : lambda x: x.count,
-            "mean"  : lambda x: x.mean,
-            "min"   : lambda x: x.min,
-            "max"   : lambda x: x.max,
-            "std"   : lambda x: x.std,
-            "median": lambda x: x.median,
-            "size"  : lambda x: x.size
-        }
+
 
         df_func = df[cols] if cols else df[:,col_from:col_to]
-        df[col] = functions[func](df_func)(axis=1)
+        df[col] = FUNCTIONS[func](df_func)(axis=1)
 
     return df.to_json(orient="records")
 
