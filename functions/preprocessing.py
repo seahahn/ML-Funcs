@@ -157,7 +157,9 @@ async def set_train_test_split(
                 if valid_size <= 0 or valid_size >= 1:
                     return f'"valid_size" should be float between 0, 1(not equal). current {valid_size}'
             except: return f'"valid_size" should be float between 0, 1(not equal). current {valid_size}'
-
+        valid_size = valid_size/(1-test_size)
+        if test_size + valid_size >= 1:
+            return '"test_size" + "valid_size" should be less than 1'
         X_train, X_valid, y_train, y_valid = train_test_split(
             X_train, y_train, # *arrays
             test_size    = valid_size,
