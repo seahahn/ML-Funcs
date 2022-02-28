@@ -25,7 +25,8 @@ from functions.processing import (
     set_sort_values,
     set_merge,
     set_concat,
-    set_column
+    set_column,
+    set_astype
 )
 
 from functions.preprocessing import (
@@ -59,6 +60,7 @@ __all__ = [
     "set_merge",
     "set_concat",
     "set_column",
+    "set_astype",
 
     "set_feature_target_split",
     "set_train_test_split",

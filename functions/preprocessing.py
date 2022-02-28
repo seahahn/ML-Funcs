@@ -51,11 +51,14 @@ async def set_feature_target_split(
 async def set_train_test_split(
     item        : Request,
     *,
-    test_size   : Optional[str] = Query(None,   max_length=50),
-    train_size  : Optional[str] = Query(None,   max_length=50),
-    random_state: Optional[str] = Query(None,   max_length=50),
-    shuffle     : Optional[str] = Query("true", max_length=50),
-    stratify    : Optional[str] = Query(None,   max_length=50),
+    test_size   : Optional[str] = Query(None,    max_length=50),
+    # train_size  : Optional[str] = Query(None,    max_length=50),
+    random_state: Optional[str] = Query(None,    max_length=50),
+    shuffle     : Optional[str] = Query("true",  max_length=50),
+    stratify    : Optional[str] = Query("false", max_length=50),
+    valid       : Optional[str] = Query("false", max_length=50),
+    valid_size  : Optional[str] = Query(None,    max_length=50),
+    # v_train_size: Optional[str] = Query(None,    max_length=50),
 ) -> str:
     """
     ```python
@@ -86,11 +89,14 @@ async def set_train_test_split(
     }
     ```
     """
-    test_size    = None   if test_size    == "" else test_size
-    train_size   = None   if train_size   == "" else train_size
-    random_state = None   if random_state == "" else random_state
-    shuffle      = "true" if shuffle      == "" else shuffle
-    stratify     = None   if stratify     == "" else stratify
+    test_size    = None    if test_size    == "" else test_size
+    # train_size   = None    if train_size   == "" else train_size
+    random_state = None    if random_state == "" else random_state
+    shuffle      = "true"  if shuffle      == "" else shuffle
+    stratify     = "false" if stratify     == "" else stratify
+    valid        = "false" if valid        == "" else valid
+    valid_size   = None    if valid_size   == "" else valid_size
+    # v_train_size = None    if v_train_size == "" else v_train_size
 
     dfs = await item.json()
     X = pd.read_json(dfs["X"])
@@ -104,16 +110,16 @@ async def set_train_test_split(
                 return f'"test_size" should be float between 0, 1(not equal). current {test_size}'
         except: return f'"test_size" should be float between 0, 1(not equal). current {test_size}'
 
-    ## train_size:   0 < train_size < 1 인 float
-    if train_size is not None:
-        if test_size is None:
-            try: 
-                train_size = float(train_size)
-                if train_size <= 0 or train_size >= 1:
-                    return f'"train_size" should be float between 0, 1(not equal). current {train_size}'
-            except: return f'"train_size" should be float between 0, 1(not equal). current {train_size}'
-        else:
-            return "Can only use train_size when test_size is None"
+    # ## train_size:   0 < train_size < 1 인 float
+    # if train_size is not None:
+    #     if test_size is None:
+    #         try: 
+    #             train_size = float(train_size)
+    #             if train_size <= 0 or train_size >= 1:
+    #                 return f'"train_size" should be float between 0, 1(not equal). current {train_size}'
+    #         except: return f'"train_size" should be float between 0, 1(not equal). current {train_size}'
+    #     else:
+    #         return "Can only use train_size when test_size is None"
 
     ## random_state: 랜덤 시드. int
     try: random_state = int(random_state)
@@ -128,19 +134,48 @@ async def set_train_test_split(
         # If not None, data is split in a stratified fashion, using this as
         # the class labels.
         # Read more in the :ref:`User Guide <stratification>`.
-    if stratify.lower() == "y":
-        stratify = y
-    else:
-        stratify = None
+    stratify = boolean(stratify)
+    if stratify is None: return '"stratify" should be bool, "true" or "false"'
+
+
+    valid = boolean(valid)
+    if valid is None: return '"valid" should be bool, "true" or "false"'
 
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, # *arrays
         test_size    = test_size,
-        train_size   = train_size,
+        # train_size   = train_size,
         random_state = random_state,
         shuffle      = shuffle,
-        stratify     = stratify,
+        stratify     = y if stratify else None,
     )
+    if valid:
+        ## valid_size:    0 < valid_size < 1 인 float
+        if valid_size is not None:
+            try: 
+                valid_size = float(valid_size)
+                if valid_size <= 0 or valid_size >= 1:
+                    return f'"valid_size" should be float between 0, 1(not equal). current {valid_size}'
+            except: return f'"valid_size" should be float between 0, 1(not equal). current {valid_size}'
+        valid_size = valid_size/(1-test_size)
+        if test_size + valid_size >= 1:
+            return '"test_size" + "valid_size" should be less than 1'
+        X_train, X_valid, y_train, y_valid = train_test_split(
+            X_train, y_train, # *arrays
+            test_size    = valid_size,
+            # train_size   = train_size,
+            random_state = random_state,
+            shuffle      = shuffle,
+            stratify     = y_train if stratify else None,
+        )
+        return json.dumps( {
+            "X_train": X_train.to_json(orient="records"),
+            "X_valid": X_valid.to_json(orient="records"),
+            "X_test" : X_test.to_json(orient="records"),
+            "y_train": y_train.to_json(orient="records"),
+            "y_valid": y_valid.to_json(orient="records"),
+            "y_test" : y_test.to_json(orient="records"),
+        } )
 
     # 시계열 기준일 경우 
     # shuffle  = False,

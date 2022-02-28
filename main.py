@@ -49,6 +49,7 @@ from functions import (
     set_merge,
     set_concat,
     set_column,
+    set_astype,
 
     set_feature_target_split,
     set_train_test_split,
@@ -86,6 +87,7 @@ set_sort_values    = app.post("/dataframe/sort_values")    (set_sort_values)
 set_merge          = app.post("/dataframe/merge")          (set_merge)
 set_concat         = app.post("/dataframe/concat")         (set_concat)
 set_column         = app.post("/dataframe/set_column")     (set_column)
+set_astype         = app.post("/dataframe/astype")         (set_astype)
 
 set_feature_target_split = app.post("/dataframe/feature_target_split")(set_feature_target_split)
 set_train_test_split     = app.post("/dataframe/train_test_split")    (set_train_test_split)
