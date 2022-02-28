@@ -92,9 +92,9 @@ set_train_test_split     = app.post("/dataframe/train_test_split")    (set_train
 
 
 
-box_plot = app.get("/plot/boxplot")(box_plot)
-hist_plot = app.get("/plot/histplot")(hist_plot)
-count_plot = app.get("/plot/countplot")(count_plot)
-scatter_plot = app.get("/plot/scatterplot")(scatter_plot)
+box_plot = app.post("/plot/boxplot")(box_plot)
+hist_plot = app.post("/plot/histplot")(hist_plot)
+count_plot = app.post("/plot/countplot")(count_plot)
+scatter_plot = app.post("/plot/scatterplot")(scatter_plot)
 
 
