@@ -34,12 +34,12 @@ async def set_groupby(
     func:       str,
     *,
     axis:       Optional[str] = Query(0,       max_length=50),
-    as_index:   Optional[str] = Query("True",  max_length=50), 
-    sort:       Optional[str] = Query("True",  max_length=50), 
-    group_keys: Optional[str] = Query("True",  max_length=50), 
-    observed:   Optional[str] = Query("False", max_length=50), 
+    as_index:   Optional[str] = Query("True",  max_length=50),
+    sort:       Optional[str] = Query("True",  max_length=50),
+    group_keys: Optional[str] = Query("True",  max_length=50),
+    observed:   Optional[str] = Query("False", max_length=50),
     dropna:     Optional[str] = Query("True",  max_length=50)
-    # level:      Optional[str] = Query(None,    max_length=50), # MultiIndex 에서 사용하는 것! 
+    # level:      Optional[str] = Query(None,    max_length=50), # MultiIndex 에서 사용하는 것!
 ) -> str:
     """pandas.DataFrame.groupby(by).func() 결과를 리턴하는 함수
     ```
@@ -79,7 +79,7 @@ async def set_groupby(
     func = func.lower()
     if not func in FUNCTIONS:
         return f'"{func}" is invalid function. "func" should be in {FUNCTIONS}'
-    
+
     df = pd.read_json(await item.json())
 
     ## by
@@ -99,7 +99,7 @@ async def set_groupby(
         if axis not in [0, 1]: return '"axis" should be 0, 1. row(0), column(1)'
     except:
         return '"axis" should be 0, 1. row(0), column(1)'
-    
+
     ## level(미구현)
     # If the axis is a MultiIndex (hierarchical), group by a particular level or levels.
 
@@ -110,7 +110,7 @@ async def set_groupby(
     ## sort
     sort = boolean(sort)
     if sort is None: return '"sort" should be bool, "true" or "false"'
-    
+
     ## group_keys
     group_keys = boolean(group_keys)
     if group_keys is None: return '"group_keys" should be bool, "true" or "false"'
@@ -138,12 +138,12 @@ async def set_groupby(
         observed   = observed,
         dropna     = dropna
     )
-    
+
     return FUNCTIONS[func](df_group).reset_index().to_json(orient="records")
 
 
 async def set_drop(
-    item:    Request, 
+    item:    Request,
     labels:  str,
     *,
     axis:    Optional[str] = Query(0,       max_length=50),
@@ -190,14 +190,14 @@ async def set_drop(
         if axis not in [0, 1]: return '"axis" should be 0, 1. row(0), column(1)'
     except:
         return '"axis" should be 0, 1. row(0), column(1)'
-    
+
     #labels
     try:
         # if labels is None:
         #     return '"labels" is a required parameter.'
         labels = [i.strip() for i in labels.split(",") if i.strip() != ""]
         if errors == "raise":
-            if axis: 
+            if axis:
                 dfcols = df.columns
                 if str(dfcols.dtype) != "object": labels = [int(i) for i in labels]
                 dfcols = set(dfcols)
@@ -212,7 +212,7 @@ async def set_drop(
                 else   : return f'"labels" should be string array(index names) divied by ","\nlist not in DataFrame indexes: {error_list}'
     except:
         return '"labels" should be string array(column names) divied by ","'
-    
+
     return df.drop(
         labels = labels,
         axis   = axis,
@@ -261,7 +261,7 @@ async def set_dropna(
         if axis not in [0, 1]: return '"axis" should be 0, 1. row(0), column(1)'
     except:
         return '"axis" should be 0, 1. row(0), column(1)'
-    
+
     ## how
     how = how.lower()
     if how not in ["any", "all"]:
@@ -347,13 +347,13 @@ async def set_rename(
                 return f'"keys" should be string array(column names) divied by ",". list not in DataFrame columns: {error_list}'
     except:
         return f'"keys" should be string array(column names) divied by ",". current keys = {keys}'
-    
+
     ## values
     try:
         values = [i.strip() for i in values.split(",") if i.strip() != ""]
     except:
         return f'"values" should be string array(new column names) divied by ",". current values = {values}'
-    
+
     if len(keys) != len(values):
         return f'"keys" and "values" should be same length. current len(keys) = {len(keys)} != {len(values)} = len(values)'
 
@@ -365,9 +365,9 @@ async def set_rename(
     errors = errors.lower()
     if errors not in ["raise", "ignore"]:
         return f'"errors" should be "raise" or "ignore". current errors = {errors}'
-    
+
     mapper = {keys[i]:values[i] for i in range(len(keys))}
-    
+
     return df.rename(
         mapper = mapper,
         axis   = 1,
@@ -427,7 +427,7 @@ async def set_sort_values(
             return f'"by" should be string array(column names) divied by ","\nlist not in DataFrame columns: {error_list}'
     except:
         return '"by" should be string array(column names) divied by ","'
-    
+
     ## axis
     try:
         axis = int(axis)
@@ -447,12 +447,12 @@ async def set_sort_values(
     ## na_pos: na_position
     na_pos = na_pos.lower()
     if na_pos not in ["first", "last"]:
-        return f'"na_pos: na_position" should be "first" or "last". current na_pos: na_pos = {na_pos}'    
+        return f'"na_pos: na_position" should be "first" or "last". current na_pos: na_pos = {na_pos}'
 
     ## ig_idx: ignore_index
     ig_idx = boolean(ig_idx)
     if ig_idx is None: return '"ig_idx: ignore_index" should be bool, "true" or "false"'
-    
+
     ## key => sorted 함수의 key와 동일. 함수를 넣어야 해서 일단 구현 보류
     # callable, optional
     # If not None, apply the key function to the series values
@@ -460,7 +460,7 @@ async def set_sort_values(
     # builtin :meth:`sorted` function, with the notable difference that
     # this `key` function should be *vectorized*. It should expect a
     # ``Series`` and return an array-like.
-    
+
     return df.sort_values(
         by           = by,
         axis         = axis,
@@ -474,7 +474,7 @@ async def set_sort_values(
 
 
 async def set_merge(
-    item:        Request, 
+    item:        Request,
     # item2:       Request,
     *,
     how:         Optional[str] = Query("inner",     max_length=50),
@@ -563,7 +563,7 @@ async def set_merge(
                 return f'"left_on" should be string array(column names) divied by ","\nlist not in DataFrame1 columns: {error_list}'
         except:
             return '"left_on" should be string array(column names) divied by ","'
-    
+
     ## right_on
     if right_on is not None:
         try:
@@ -573,14 +573,14 @@ async def set_merge(
                 return f'"on" should be string array(column names) divied by ","\nlist not in DataFrame2 columns: {error_list}'
         except:
             return '"right_on" should be string array(column names) divied by ","'
-    
+
     ## left_index
     left_index = boolean(left_index)
-    if left_index is None: return '"left_index" should be bool, "true" or "false"' 
+    if left_index is None: return '"left_index" should be bool, "true" or "false"'
 
     ## right_index
     right_index = boolean(right_index)
-    if right_index is None: return '"right_index" should be bool, "true" or "false"' 
+    if right_index is None: return '"right_index" should be bool, "true" or "false"'
 
     ## sort
     sort = boolean(sort)
@@ -652,7 +652,7 @@ async def set_concat(
     names      (str,     optional): Default None,    "names" should be string array(grouped index`s column names) divied by ","
     veri_integ (str,     optional): Default "false", true: axis에 따라 중복된 컬럼 또는 row가 있으면 에러 발생! false: 에러 없음
     sort       (str,     optional): Default "false", true: 인덱스 기준으로 정렬한다 false: 정렬 안 한다
-    copy       (str,     optional): Default "true",  
+    copy       (str,     optional): Default "true",
     ```
     Returns:
     ```
@@ -677,18 +677,18 @@ async def set_concat(
         objs = [df_left, df_right]
     else:
         return "merge must be needed two DataFrame"
-    
+
     ## axis
     try:
         axis = int(axis)
         if axis not in [0, 1]: return '"axis" should be 0, 1. row(0), column(1)'
     except:
         return '"axis" should be 0, 1. row(0), column(1)'
-    
+
     ## join
     if join not in ['inner', 'outer']:
         return f'"join" should be ["inner", "outer"]. current join = {join}'
-    
+
     ## ig_idx
     ig_idx = boolean(ig_idx)
     if ig_idx is None: return '"ig_idx" should be bool, "true" or "false"'
@@ -721,7 +721,7 @@ async def set_concat(
         except: return '"names" should be string array(grouped index`s column names) divied by ","'
 
     ## veri_integ => verify_integrity
-    #  Check whether the new concatenated axis contains duplicates. 
+    #  Check whether the new concatenated axis contains duplicates.
     #  This can be very expensive relative to the actual data concatenation.
     veri_integ = boolean(veri_integ)
     if veri_integ is None: return '"veri_integ: verify_integrity" should be bool, "true" or "false"'
@@ -771,7 +771,7 @@ async def set_column(
 
     둘 다 동시에 사용할 수 없음
 
-    
+
     ※ func 사용시 유의사항
     1. cols 를 사용하면 col_from:col_to 는 사용할 수 없습니다. 둘 중 하나 사용 가능
     2. func는 다음 중 하나여야 합니다. ["sum", "count", "mean", "min", "max", "std", "median"]
@@ -829,7 +829,7 @@ async def set_column(
             for i, v in enumerate(cols_ops):
                 if i%2 == 0:
                     if v in dfcols: deq.append(df[v]) # df columns이면 시리즈로
-                    else : 
+                    else :
                         try   : deq.append(float(v))  # 아니면 그냥 numeric으로
                         except: return f'"{v}" is not in columns of DataFrame. It should be in {dfcols}'
                 else:
@@ -845,7 +845,7 @@ async def set_column(
                     right = cols_ops.popleft()
                     cur = operators[cur](left, right)
                 deq.append(cur)
-        
+
         df[col] = deq.pop()
 
     else:
@@ -853,16 +853,16 @@ async def set_column(
         func = func.lower()
         if not func in FUNCTIONS:
             return f'"{func}" is invalid function. "func" should be in {FUNCTIONS}'
-        
+
         # cols = col1,col2,col3....
         # math = + - x /
         # func = sum, std, mean ...
         if str(df.columns.dtype) == "int64":
             if cols is None:
-                if col_from is not None: 
+                if col_from is not None:
                     try   : col_from = int(col_from)
                     except: return "column type is int. col_from should be int."
-                if col_to is not None: 
+                if col_to is not None:
                     try   : col_to = int(col_to)
                     except: return "column type is int. col_to should be int."
             else:

@@ -35,10 +35,10 @@ from functions.preprocessing import (
 )
 
 __all__ = [
-    "create_upload_file", 
+    "create_upload_file",
 
-    "get_head", 
-    "get_tail", 
+    "get_head",
+    "get_tail",
     "get_shape",
     "get_dtype",
     "get_columns",

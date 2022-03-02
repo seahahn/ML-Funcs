@@ -55,15 +55,14 @@ async def box_plot(
     #출력하고자하는 특성이 데이터프레임내에 존재하는지 확인
     for col in cols:
         if not col in df.columns:
-            return {
-                "stat" : 200,
-                "body" : f"{col}이라는 특성이 없습니다. 가능 특성{df.columns}"
-            }
+            return f"{col}이라는 특성이 없습니다. 가능 특성{df.columns}"
+
         if df[col].dtype != np.float64 and df[col].dtype != np.float32 and df[col].dtype != np.int64 and df[col].dtype != np.int32:
-             return {
-                "stat" : 200,
-                "body" : f"{col}이라는 특성은 숫자형 자료가 아닙니다."
-            }
+             return f"{col}이라는 특성은 숫자형 자료가 아닙니다."
+
+        if df[col].isna():
+            return f"{col}특성에 결측치가 있습니다."
+
         feature.append(col)
 
     #plot의 x축을 특성명으로 설정
@@ -121,18 +120,17 @@ async def hist_plot(
 
     #출력하고자하는 특성이 데이터프레임내에 존재하는지 확인
     if not col in df.columns:
-        return {
-                "stat" : 200,
-                "body" : f"{col}이라는 특성이 없습니다. 가능 특성{df.columns}"
-            }
+        return f"{col}이라는 특성이 없습니다. 가능 특성{df.columns}"
+
 
 
     #col이라는 특성이 숫자형인지 확인
     if df[col].dtype != np.float64 and df[col].dtype != np.float32 and df[col].dtype != np.int64 and df[col].dtype != np.int32:
-            return {
-            "stat" : 200,
-            "body" : f"{col}이라는 특성은 숫자형 자료가 아닙니다."
-        }
+            return f"{col}이라는 특성은 숫자형 자료가 아닙니다."
+
+
+    if df[col].isna():
+        return f"{col}특성에 결측치가 있습니다."
 
     #해당 특성의 데이터를 히스토그램으로 변환
     hist, edges = np.histogram(df[col], density=True, bins=50) # 데이터셋에 결측치 존재 시 오류 발생
@@ -161,16 +159,15 @@ async def count_plot(
 
     #출력하고자하는 특성이 데이터프레임내에 존재하는지 확인
     if not col in df.columns:
-        return {
-                "stat" : 200,
-                "body" : f"{col}이라는 특성이 없습니다. 가능 특성{df.columns}"
-            }
+        return f"{col}이라는 특성이 없습니다. 가능 특성{df.columns}"
+
+
     #해당 특성의 데이터 타입이 문자열인지 확인
     if df[col].dtype == np.float64 or df[col].dtype == np.float32 or df[col].dtype == np.int64 or df[col].dtype == np.int32:
-            return {
-            "stat" : 200,
-            "body" : f"{col}이라는 특성은 문자형 자료가 아닙니다."
-        }
+            return f"{col}이라는 특성은 문자형 자료가 아닙니다."
+
+    if df[col].isna():
+        return f"{col}특성에 결측치가 있습니다."
 
     #각 데이터별 갯수
     cnt = df[col].value_counts()
@@ -203,17 +200,18 @@ async def scatter_plot(
 
     # x_col이라는 특성이 존재하는지 확인
     if not x_col in df.columns:
-        return {
-                "stat" : 200,
-                "body" : f"{x_col}이라는 특성이 없습니다. 가능 특성{df.columns}"
-            }
+        return f"{x_col}이라는 특성이 없습니다. 가능 특성{df.columns}"
+
 
     # y_col이라는 특성이 존재하는지 확인
     if not y_col in df.columns:
-        return {
-                "stat" : 200,
-                "body" : f"{y_col}이라는 특성이 없습니다. 가능 특성{df.columns}"
-            }
+        return  f"{y_col}이라는 특성이 없습니다. 가능 특성{df.columns}"
+
+    if df[x_col].isna():
+        return f"{x_col}특성에 결측치가 있습니다."
+
+    if df[y_col].isna():
+        return f"{y_col}특성에 결측치가 있습니다."
 
 
     #x_col이라는 특성이 카테고리일때 해당 범주에 맞게 plot을 x범위 설정
