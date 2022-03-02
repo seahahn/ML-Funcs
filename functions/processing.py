@@ -530,9 +530,9 @@ async def set_merge(
     indicator   = "false" if indicator   == "" else indicator
     validate    = None    if validate    == "" else validate
 
-    item = json.loads(await item.json())
-    df_left = pd.DataFrame(item["left"])
-    df_right = pd.DataFrame(item["right"])
+    item = await item.json()
+    df_left = pd.read_json(item["left"])
+    df_right = pd.read_json(item["right"])
 
     ## how
     if how not in {"left", "right", "outer", "inner", "cross"}:
@@ -669,9 +669,9 @@ async def set_concat(
     sort       = "false" if sort       == "" else sort
     copy       = "true"  if copy       == "" else copy
 
-    item = json.loads(await item.json())
-    df_left = pd.DataFrame(item["left"])
-    df_right = pd.DataFrame(item["right"])
+    item = await item.json()
+    df_left = pd.read_json(item["left"])
+    df_right = pd.read_json(item["right"])
 
     if type(df_left) == type(df_right) == pd.DataFrame:
         objs = [df_left, df_right]
