@@ -63,7 +63,7 @@ async def set_train_test_split(
     """
     ```python
     X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(X, y)
-    
+
     # 입력 item은 X 와 y 키에 각각 데이터 프레임이 들어있어야 함.
     # test_size와 train_size는 둘 중 하나만 입력 가능.
     # stratify는 None 또는 'y'만 가능
@@ -80,7 +80,7 @@ async def set_train_test_split(
     ```
     Returns:
     ```
-    str: JSON, 
+    str: JSON,
     {
         "X_train": X_train.to_json(orient="records"),
         "X_test" : X_test .to_json(orient="records"),
@@ -104,7 +104,7 @@ async def set_train_test_split(
 
     ## test_size:    0 < test_size < 1 인 float
     if test_size is not None:
-        try: 
+        try:
             test_size = float(test_size)
             if test_size <= 0 or test_size >= 1:
                 return f'"test_size" should be float between 0, 1(not equal). current {test_size}'
@@ -113,7 +113,7 @@ async def set_train_test_split(
     # ## train_size:   0 < train_size < 1 인 float
     # if train_size is not None:
     #     if test_size is None:
-    #         try: 
+    #         try:
     #             train_size = float(train_size)
     #             if train_size <= 0 or train_size >= 1:
     #                 return f'"train_size" should be float between 0, 1(not equal). current {train_size}'
@@ -152,7 +152,7 @@ async def set_train_test_split(
     if valid:
         ## valid_size:    0 < valid_size < 1 인 float
         if valid_size is not None:
-            try: 
+            try:
                 valid_size = float(valid_size)
                 if valid_size <= 0 or valid_size >= 1:
                     return f'"valid_size" should be float between 0, 1(not equal). current {valid_size}'
@@ -177,7 +177,7 @@ async def set_train_test_split(
             "y_test" : y_test.to_json(orient="records"),
         } )
 
-    # 시계열 기준일 경우 
+    # 시계열 기준일 경우
     # shuffle  = False,
     # stratify = None
 
@@ -203,19 +203,19 @@ async def set_train_test_split(
 #     dfs = [pd.read_json(i) for i in json.loads(await item.json())]
 
 #     onehot = OneHotEncoder(
-#         verbose=0, 
-#         cols=None, 
-#         drop_invariant=False, 
+#         verbose=0,
+#         cols=None,
+#         drop_invariant=False,
 #         return_df=True,
-#         handle_missing='value', 
-#         handle_unknown='value', 
+#         handle_missing='value',
+#         handle_unknown='value',
 #         use_cat_names=False
 #     )
 #     df_encoded = []
 #     df_encoded.append(onehot.fit_transform(dfs[0]))
 #     for i in dfs[1:]:
 #         df_encoded.append(onehot.transform(i))
-    
+
 
 # async def set_ordinal_encoder(
 #     item          : Request,
@@ -247,12 +247,12 @@ async def set_train_test_split(
 #     dfs = [pd.read_json(i) for i in json.loads(await item.json())]
 
 #     ordinal = OrdinalEncoder(
-#         verbose=0, 
-#         mapping=None, 
-#         cols=None, 
-#         drop_invariant=False, 
+#         verbose=0,
+#         mapping=None,
+#         cols=None,
+#         drop_invariant=False,
 #         return_df=True,
-#         handle_unknown='value', 
+#         handle_unknown='value',
 #         handle_missing='value'
 #     )
 
@@ -260,7 +260,7 @@ async def set_train_test_split(
 #     df_encoded.append(ordinal.fit_transform(dfs[0]))
 #     for i in dfs[1:]:
 #         df_encoded.append(ordinal.transform(i))
-    
+
 
 
 # async def set_target_encoder(
@@ -278,13 +278,13 @@ async def set_train_test_split(
 #     dfs = [pd.read_json(i) for i in json.loads(await item.json())]
 
 #     target = TargetEncoder(
-#         verbose=0, 
-#         cols=None, 
-#         drop_invariant=False, 
-#         return_df=True, 
+#         verbose=0,
+#         cols=None,
+#         drop_invariant=False,
+#         return_df=True,
 #         handle_missing='value',
-#         handle_unknown='value', 
-#         min_samples_leaf=1, 
+#         handle_unknown='value',
+#         min_samples_leaf=1,
 #         smoothing=1.0
 #     )
 #     df_encoded = []

@@ -39,11 +39,7 @@ async def set_groupby(
     group_keys: Optional[str] = Query("True",  max_length=50),
     observed:   Optional[str] = Query("False", max_length=50),
     dropna:     Optional[str] = Query("True",  max_length=50)
-<<<<<<< HEAD
-    # level:      Optional[str] = Query(None,  max_length=50), # MultiIndex 에서 사용하는 것!
-=======
-    # level:      Optional[str] = Query(None,    max_length=50), # MultiIndex 에서 사용하는 것! 
->>>>>>> cbe80c8dca3ad6b6fd91443b3a33be14abb4106c
+    # level:      Optional[str] = Query(None,    max_length=50), # MultiIndex 에서 사용하는 것!
 ) -> str:
     """pandas.DataFrame.groupby(by).func() 결과를 리턴하는 함수
     ```
@@ -81,15 +77,9 @@ async def set_groupby(
 
     ## func
     func = func.lower()
-<<<<<<< HEAD
-    if not func in func_list:
-        return f'"{func}" is invalid function. "func" should be in {func_list}'
-
-=======
     if not func in FUNCTIONS:
         return f'"{func}" is invalid function. "func" should be in {FUNCTIONS}'
-    
->>>>>>> cbe80c8dca3ad6b6fd91443b3a33be14abb4106c
+
     df = pd.read_json(await item.json())
 
     ## by
@@ -148,24 +138,8 @@ async def set_groupby(
         observed   = observed,
         dropna     = dropna
     )
-<<<<<<< HEAD
 
-    functions = {
-        "sum"   : df_group.sum,
-        "count" : df_group.count,
-        "mean"  : df_group.mean,
-        "min"   : df_group.min,
-        "max"   : df_group.max,
-        "std"   : df_group.std,
-        "median": df_group.median,
-        "size"  : df_group.size
-    }
-
-    return functions[func]().to_json(orient="records")
-=======
-    
     return FUNCTIONS[func](df_group).reset_index().to_json(orient="records")
->>>>>>> cbe80c8dca3ad6b6fd91443b3a33be14abb4106c
 
 
 async def set_drop(
@@ -223,19 +197,11 @@ async def set_drop(
         #     return '"labels" is a required parameter.'
         labels = [i.strip() for i in labels.split(",") if i.strip() != ""]
         if errors == "raise":
-<<<<<<< HEAD
             if axis:
-                cols = df.columns
-                if str(cols.dtype) != "object": labels = [int(i) for i in labels]
-                cols = set(cols)
-                error_list = [i for i in labels if i not in cols]
-=======
-            if axis: 
                 dfcols = df.columns
                 if str(dfcols.dtype) != "object": labels = [int(i) for i in labels]
                 dfcols = set(dfcols)
                 error_list = [i for i in labels if i not in dfcols]
->>>>>>> cbe80c8dca3ad6b6fd91443b3a33be14abb4106c
             else:
                 idxs = df.index
                 if str(idxs.dtype) != "object": labels = [int(i) for i in labels]
@@ -461,16 +427,13 @@ async def set_sort_values(
             return f'"by" should be string array(column names) divied by ","\nlist not in DataFrame columns: {error_list}'
     except:
         return '"by" should be string array(column names) divied by ","'
-<<<<<<< HEAD
-=======
-    
+
     ## axis
     try:
         axis = int(axis)
         if axis not in [0, 1]: return '"axis" should be 0, 1. row(0), column(1)'
     except:
         return '"axis" should be 0, 1. row(0), column(1)'
->>>>>>> cbe80c8dca3ad6b6fd91443b3a33be14abb4106c
 
     ## ascd: ascending
     ascd = boolean(ascd)
@@ -797,8 +760,6 @@ async def set_column(
     func    : Optional[str] = Query(None, max_length=50),
     cols_ops: Optional[str] = Query(None, max_length=50),
 ) -> str:
-<<<<<<< HEAD
-=======
     """
     ```
     item은 입력받을 dataframe,
@@ -810,7 +771,7 @@ async def set_column(
 
     둘 다 동시에 사용할 수 없음
 
-    
+
     ※ func 사용시 유의사항
     1. cols 를 사용하면 col_from:col_to 는 사용할 수 없습니다. 둘 중 하나 사용 가능
     2. func는 다음 중 하나여야 합니다. ["sum", "count", "mean", "min", "max", "std", "median"]
@@ -844,7 +805,6 @@ async def set_column(
     col_to   = None if col_to   == "" else col_to
     func     = None if func     == "" else func
     cols_ops = None if cols_ops == "" else cols_ops
->>>>>>> cbe80c8dca3ad6b6fd91443b3a33be14abb4106c
 
     df = pd.read_json(await item.json())
     dfcols = set(df.columns)
@@ -863,29 +823,13 @@ async def set_column(
 
         deq = deque()
 
-<<<<<<< HEAD
-    maths = {
-        "add" : lambda x, y: x + y,
-        "mul" : lambda x, y: x * y,
-        "sub" : lambda x, y: x - y,
-        "isub": lambda x, y: y - x,
-        "div" : lambda x, y: x / y,
-        "idiv": lambda x, y: y / x,
-    }
-    left = df[cols[0]]
-    for i, x in enumerate(math):
-        right = cols[i+1]
-        left = maths[x](left, right)
-    df[col] = left
-    print(df[col])
-=======
         if cols_ops:
             try   : cols_ops = [i.strip() for i in cols_ops.split(",") if i.strip() != ""]
             except: return '"cols_ops" should be array(column names and operators) divied by ","'
             for i, v in enumerate(cols_ops):
                 if i%2 == 0:
                     if v in dfcols: deq.append(df[v]) # df columns이면 시리즈로
-                    else : 
+                    else :
                         try   : deq.append(float(v))  # 아니면 그냥 numeric으로
                         except: return f'"{v}" is not in columns of DataFrame. It should be in {dfcols}'
                 else:
@@ -901,7 +845,7 @@ async def set_column(
                     right = cols_ops.popleft()
                     cur = operators[cur](left, right)
                 deq.append(cur)
-        
+
         df[col] = deq.pop()
 
     else:
@@ -909,16 +853,16 @@ async def set_column(
         func = func.lower()
         if not func in FUNCTIONS:
             return f'"{func}" is invalid function. "func" should be in {FUNCTIONS}'
-        
+
         # cols = col1,col2,col3....
         # math = + - x /
         # func = sum, std, mean ...
         if str(df.columns.dtype) == "int64":
             if cols is None:
-                if col_from is not None: 
+                if col_from is not None:
                     try   : col_from = int(col_from)
                     except: return "column type is int. col_from should be int."
-                if col_to is not None: 
+                if col_to is not None:
                     try   : col_to = int(col_to)
                     except: return "column type is int. col_to should be int."
             else:
@@ -951,4 +895,3 @@ async def set_astype(item: Request, col:str, dtype:str) -> str:
         return f"{col}: 존재하지 않는 컬럼"
     df[col] = df[col].astype(dtype)
     return df.to_json(orient="records")
->>>>>>> cbe80c8dca3ad6b6fd91443b3a33be14abb4106c
