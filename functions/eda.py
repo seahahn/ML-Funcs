@@ -22,8 +22,13 @@ async def get_shape(item: Request) -> str:
     return json.dumps(pd.read_json(await item.json()).shape)
 
 
+<<<<<<< HEAD
 async def get_dtype(item: Request) -> str:
     return json.dumps({i:str(v) for i,v in pd.read_json(await item.json()).dtypes.to_dict().items()})
+=======
+async def get_dtype(item: Request) -> str:    
+    return pd.read_json(await item.json()).dtypes.reset_index(name='Dtype').rename(columns={"index":"Column"}).to_json(orient="records", default_handler=str)
+>>>>>>> cbe80c8dca3ad6b6fd91443b3a33be14abb4106c
 
 
 async def get_columns(item: Request) -> str:
@@ -67,7 +72,9 @@ async def get_na(item: Request, *, sum: Optional[str] = Query("false", max_lengt
     (str): JSON
     ```
     """
-    if   sum.lower() == "true" : return pd.read_json(await item.json()).isna().sum().to_json(orient="records")
+    if   sum.lower() == "true" : 
+        return pd.read_json(await item.json()).isna().sum().reset_index(name='NumOfNaN')\
+            .rename(columns={"index":"Column"}).to_json(orient="records", default_handler=str)
     elif sum.lower() == "false": return pd.read_json(await item.json()).isna().to_json(orient="records")
     else                       : return "sum은 true or false를 넣으셔야 합니다."
 
@@ -88,6 +95,8 @@ async def get_corr(
     col1, col2는 데이터가 클 때, 보고 싶은 데이터만 볼수 있는 기능입니다.
     col1, col2 둘 다 입력: 두 columns의 상관관계만 리턴
     col1, col2 둘 중 하나: 해당 column과 나머지의 상관관계를 리턴
+
+    인덱스를 살려야 함.
     ```
     Args:
     ```
@@ -102,6 +111,11 @@ async def get_corr(
     (str): JSON
     ```
     """
+    method  = "pearson" if method  == "" else method
+    req_min = 1         if req_min == "" else req_min
+    col1    = None      if col1    == "" else col1
+    col2    = None      if col2    == "" else col2
+
     if not method in ["pearson", "kendall", "spearman"]:
         return 'method should be in ["pearson", "kendall", "spearman"]'
 
@@ -113,33 +127,40 @@ async def get_corr(
         return "req_min should be positive integer"
 
     df = pd.read_json(await item.json())
+<<<<<<< HEAD
     cols = list(df.columns)
     if col1 and col1 not in cols:
         return f"{col1} is not in columns of DataFrame. It should be in {cols}"
     if col2 and col2 not in cols:
         return f"{col2} is not in columns of DataFrame. It should be in {cols}"
 
+=======
+    dfcols = list(df.columns)
+    if col1 and col1 not in dfcols: return f"{col1} is not in columns of DataFrame. It should be in {dfcols}"
+    if col2 and col2 not in dfcols: return f"{col2} is not in columns of DataFrame. It should be in {dfcols}"
+    
+>>>>>>> cbe80c8dca3ad6b6fd91443b3a33be14abb4106c
     if col1 and col2:
-        return json.dumps(df[col1].corr(
+        return df[col1].corr(
             other       = df[col2],
             method      = method,
             min_periods = req_min
-        ))
+        )
     elif col1:
         return df.corr(
             method      = method,
             min_periods = req_min
-        )[col1].to_json(orient="records")
+        )[col1].reset_index(name=col1).rename(columns={"index":"Column"}).to_json(orient="records", default_handler=str)
     elif col2:
         return df.corr(
             method      = method,
             min_periods = req_min
-        )[col2].to_json(orient="records")
+        )[col2].reset_index(name=col2).rename(columns={"index":"Column"}).to_json(orient="records", default_handler=str)
     else:
         return df.corr(
             method      = method,
             min_periods = req_min
-        ).to_json(orient="records")
+        ).reset_index().rename(columns={"index":""}).to_json(orient="records")
 
 
 async def get_describe(
@@ -185,10 +206,23 @@ async def get_describe(
     (str): JSON
     ```
     """
+    percentiles = None if percentiles == "" else percentiles
+    num         = 0    if num         == "" else num
+    obj         = 0    if obj         == "" else obj
+    cat         = 0    if cat         == "" else cat
+    date        = 0    if date        == "" else date
+    date2num    = ""   if date2num    == "" else date2num
 
 
-    try:    percentiles = [float(i) for i in percentiles.split(",") if i.strip() != ""] if percentiles else None
-    except: return "percentiles should be 0~1 float string divided by ','"
+    if percentiles is not None:
+        try:
+            percentiles = [float(i) for i in percentiles.split(",") if i.strip() != ""] 
+            for i, f in enumerate(percentiles):
+                if 100 > f >= 1:
+                    percentiles[i] = f/100
+                elif not (1 > f > 0):
+                    return "percentiles should be 0~1 float string divided by ','"
+        except: return "percentiles should be 0~1 float string divided by ','"
 
     try:
         num = int(num)
@@ -254,7 +288,7 @@ async def get_describe(
         include             = include if include else None,
         exclude             = exclude if exclude else None,
         datetime_is_numeric = True if date2num.lower() == "true" else False
-    ).to_json(orient="records")
+    ).reset_index().rename(columns={"index":"Info"}).to_json(orient="records")
 
 
 async def get_col_condition(
@@ -302,6 +336,11 @@ async def get_col_condition(
     str: JSON
     ```
     """
+    cond1  = None if cond1  == "" else cond1
+    value1 = None if value1 == "" else value1
+    cond2  = None if cond2  == "" else cond2
+    value2 = None if value2 == "" else value2
+
     df = pd.read_json(await item.json())
 
     if cond1 not in ["eq", "gr", "gr_eq", "le", "le_eq"]:
@@ -318,6 +357,12 @@ async def get_col_condition(
         if cond1 is None: return '"cond1" should be used.'
         try   : value1 = float(value1)
         except: return '"value1" should be numeric(int or float).'
+<<<<<<< HEAD
+=======
+    else:
+        return '"value1" should be used.'
+        
+>>>>>>> cbe80c8dca3ad6b6fd91443b3a33be14abb4106c
 
 
 
@@ -325,10 +370,17 @@ async def get_col_condition(
         if cond2 is None: return 'If use "value2", "cond2" should be used.'
         try   : value2 = float(value2)
         except: return '"value2" should be numeric(int or float).'
+<<<<<<< HEAD
 
 
     cols = list(df.columns)
     if col in cols:
+=======
+        
+    
+    dfcols = list(df.columns)
+    if col in dfcols:
+>>>>>>> cbe80c8dca3ad6b6fd91443b3a33be14abb4106c
         if cond2:
             if cond1 is None: return '"cond2" needs "cond1". Should not be used alone.'
             if cond1[0] == "l":
@@ -356,7 +408,7 @@ async def get_col_condition(
         # print(df)
         return df.to_json(orient="records")
     else:
-        return f"{col} is not in columns of DataFrame. It should be in {cols}"
+        return f"{col} is not in columns of DataFrame. It should be in {dfcols}"
 
 
 async def get_loc(
@@ -365,17 +417,17 @@ async def get_loc(
     idx      : Optional[str] = Query(None, max_length=50),
     idx_from : Optional[str] = Query(None, max_length=50),
     idx_to   : Optional[str] = Query(None, max_length=50),
-    col      : Optional[str] = Query(None, max_length=50),
+    cols     : Optional[str] = Query(None, max_length=50),
     col_from : Optional[str] = Query(None, max_length=50),
     col_to   : Optional[str] = Query(None, max_length=50),
 ) -> str:
     """
     ```python
     df = pandas.DataFrame()
-    if   idx is None and col is None: df.loc[idx_from:idx_to, col_from:col_to]
-    elif idx is None                : df.loc[idx_from:idx_to, col]
-    elif col is None                : df.loc[idx, col_from:col_to]
-    else                            : df.loc[idx, col]
+    if   idx  is None and cols is None: df.loc[idx_from:idx_to, col_from:col_to]
+    elif idx  is None                 : df.loc[idx_from:idx_to, cols]
+    elif cols is None                 : df.loc[idx, col_from:col_to]
+    else                              : df.loc[idx, cols]
     ```
     Args:
     ```
@@ -384,7 +436,7 @@ async def get_loc(
     idx      (str,     optional): Default: None, 인덱스 명
     idx_from (str,     optional): Default: None, 시작 인덱스 명
     idx_to   (str,     optional): Default: None, 끝 인덱스 명
-    col      (str,     optional): Default: None, 컬럼 명
+    cols     (str,     optional): Default: None, 컬럼 명
     col_from (str,     optional): Default: None, 시작 컬럼 명
     col_to   (str,     optional): Default: None, 끝 컬럼 명
     ```
@@ -393,6 +445,13 @@ async def get_loc(
     str: JSON
     ```
     """
+    idx       = None if idx      == "" else idx
+    idx_from  = None if idx_from == "" else idx_from
+    idx_to    = None if idx_to   == "" else idx_to
+    cols      = None if cols     == "" else cols
+    col_from  = None if col_from == "" else col_from
+    col_to    = None if col_to   == "" else col_to
+
     df = pd.read_json(await item.json())
 
     if str(df.index.dtype) == "int64":
@@ -412,8 +471,13 @@ async def get_loc(
             idx = [i.strip() for i in idx.split(",") if i.strip() != ""]
 
     if str(df.columns.dtype) == "int64":
+<<<<<<< HEAD
         if col is None:
             if col_from is not None:
+=======
+        if cols is None:
+            if col_from is not None: 
+>>>>>>> cbe80c8dca3ad6b6fd91443b3a33be14abb4106c
                 try   : col_from = int(col_from)
                 except: return "column type is int. col_from should be int."
             if col_to is not None:
@@ -421,17 +485,19 @@ async def get_loc(
                 except: return "column type is int. col_to should be int."
         else:
             col_from = col_to = None
-            try   : col = [int(i) for i in col.split(",") if i.strip() != ""]
-            except: return "column type is int. col should be int."
+            try   : cols = [int(i) for i in cols.split(",") if i.strip() != ""]
+            except: return "column type is int. cols should be int array divided by ','."
     else:
-        if col is not None:
-            col = [i.strip() for i in col.split(",") if i.strip() != ""]
+        if cols is not None:
+            try   : cols = [i.strip() for i in cols.split(",") if i.strip() != ""]
+            except: return '"cols" should be array(column names) divied by ","'
 
 
     idxs = set(df.index)
     if idx      and not set(idx) <= idxs: return f'"{idx}" is not in index of DataFrame. It should be in {idxs}'
     if idx_from and idx_from not in idxs: return f'"{idx_from}" is not in index of DataFrame. It should be in {idxs}'
     if idx_to   and idx_to   not in idxs: return f'"{idx_to}" is not in index of DataFrame. It should be in {idxs}'
+<<<<<<< HEAD
 
     cols = set(df.columns)
     if col      and not set(col) <= cols: return f'"{col}" is not in columns of DataFrame. It should be in {cols}'
@@ -443,6 +509,19 @@ async def get_loc(
     elif col is None                : df = df.loc[idx, col_from:col_to]
     else                            : df = df.loc[idx, col]
 
+=======
+    
+    dfcols = set(df.columns)
+    if cols     and not set(cols)<= dfcols: return f'"{cols}" is not in columns of DataFrame. It should be in {dfcols}'
+    if col_from and col_from not in dfcols: return f'"{col_from}" is not in columns of DataFrame. It should be in {dfcols}'
+    if col_to   and col_to   not in dfcols: return f'"{col_to}" is not in columns of DataFrame. It should be in {dfcols}'
+
+    if   idx  is None and cols is None: df = df.loc[idx_from:idx_to, col_from:col_to]
+    elif idx  is None                 : df = df.loc[idx_from:idx_to, cols]
+    elif cols is None                 : df = df.loc[idx, col_from:col_to]
+    else                              : df = df.loc[idx, cols]
+    
+>>>>>>> cbe80c8dca3ad6b6fd91443b3a33be14abb4106c
     # print(df)
     return df.to_json(orient="records")
 
@@ -453,17 +532,17 @@ async def get_iloc(
     idx      : Optional[str] = Query(None, max_length=50),
     idx_from : Optional[str] = Query(None, max_length=50),
     idx_to   : Optional[str] = Query(None, max_length=50),
-    col      : Optional[str] = Query(None, max_length=50),
+    cols     : Optional[str] = Query(None, max_length=50),
     col_from : Optional[str] = Query(None, max_length=50),
     col_to   : Optional[str] = Query(None, max_length=50),
 ) -> str:
     """
     ```python
     df = pandas.DataFrame()
-    if   idx is None and col is None: df.iloc[idx_from:idx_to, col_from:col_to]
-    elif idx is None                : df.iloc[idx_from:idx_to, col]
-    elif col is None                : df.iloc[idx, col_from:col_to]
-    else                            : df.iloc[idx, col]
+    if   idx  is None and cols is None: df.iloc[idx_from:idx_to, col_from:col_to]
+    elif idx  is None                 : df.iloc[idx_from:idx_to, col]
+    elif cols is None                 : df.iloc[idx, col_from:col_to]
+    else                              : df.iloc[idx, col]
     ```
     Args:
     ```
@@ -472,7 +551,7 @@ async def get_iloc(
     idx      (str,     optional): Default: None, 인덱스 숫자
     idx_from (str,     optional): Default: None, 시작 인덱스 숫자
     idx_to   (str,     optional): Default: None, 끝 인덱스 숫자+1
-    col      (str,     optional): Default: None, 컬럼 숫자
+    cols     (str,     optional): Default: None, 컬럼 숫자
     col_from (str,     optional): Default: None, 시작 컬럼 숫자
     col_to   (str,     optional): Default: None, 끝 컬럼 숫자+1
     ```
@@ -481,6 +560,13 @@ async def get_iloc(
     str: JSON
     ```
     """
+    idx       = None if idx      == "" else idx
+    idx_from  = None if idx_from == "" else idx_from
+    idx_to    = None if idx_to   == "" else idx_to
+    cols      = None if cols     == "" else cols
+    col_from  = None if col_from == "" else col_from
+    col_to    = None if col_to   == "" else col_to
+    
     df = pd.read_json(await item.json())
 
     if idx is None:
@@ -495,8 +581,13 @@ async def get_iloc(
         try   : idx = [int(i) for i in idx.split(",") if i.strip() != ""]
         except: return "idx should be int in iloc."
 
+<<<<<<< HEAD
     if col is None:
         if col_from is not None:
+=======
+    if cols is None:
+        if col_from is not None: 
+>>>>>>> cbe80c8dca3ad6b6fd91443b3a33be14abb4106c
             try   : col_from = int(col_from)
             except: return "col_from should be int in iloc."
         if col_to is not None:
@@ -504,23 +595,31 @@ async def get_iloc(
             except: return "col_to should be int in iloc."
     else:
         col_from = col_to = None
-        try   : col = [int(i) for i in col.split(",") if i.strip() != ""]
-        except: return "col should be int in iloc."
+        try   : cols = [int(i) for i in cols.split(",") if i.strip() != ""]
+        except: return "cols should be int in iloc."
 
     idxs = set(range(len(df.index)))
     if idx      and not set(idx) <= idxs: return f'"{idx}" is not in index of DataFrame. It should be in {idxs}'
     if idx_from and idx_from not in idxs: return f'"{idx_from}" is not in index of DataFrame. It should be in {idxs}'
     if idx_to   and idx_to   not in idxs: return f'"{idx_to}" is not in index of DataFrame. It should be in {idxs}'
 
-    cols = set(range(len(df.columns)))
-    if col      and not set(col) <= cols: return f'"{col}" is not in columns of DataFrame. It should be in {cols}'
-    if col_from and col_from not in cols: return f'"{col_from}" is not in columns of DataFrame. It should be in {cols}'
-    if col_to   and col_to   not in cols: return f'"{col_to}" is not in columns of DataFrame. It should be in {cols}'
+    dfcols = set(range(len(df.columns)))
+    if cols     and not set(cols)<= dfcols: return f'"{cols}" is not in columns of DataFrame. It should be in {dfcols}'
+    if col_from and col_from not in dfcols: return f'"{col_from}" is not in columns of DataFrame. It should be in {dfcols}'
+    if col_to   and col_to   not in dfcols: return f'"{col_to}" is not in columns of DataFrame. It should be in {dfcols}'
 
+<<<<<<< HEAD
     if   idx is None and col is None: df = df.iloc[idx_from:idx_to, col_from:col_to]
     elif idx is None                : df = df.iloc[idx_from:idx_to, col]
     elif col is None                : df = df.iloc[idx, col_from:col_to]
     else                            : df = df.iloc[idx, col]
 
+=======
+    if   idx  is None and cols is None: df = df.iloc[idx_from:idx_to, col_from:col_to]
+    elif idx  is None                 : df = df.iloc[idx_from:idx_to, cols]
+    elif cols is None                 : df = df.iloc[idx, col_from:col_to]
+    else                              : df = df.iloc[idx, cols]
+    
+>>>>>>> cbe80c8dca3ad6b6fd91443b3a33be14abb4106c
     # print(df)
     return df.to_json(orient="records")

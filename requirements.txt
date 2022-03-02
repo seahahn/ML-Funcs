@@ -1,6 +1,8 @@
 numpy
 modin[all]
 sklearn
+category_encoders
+xgboost
 bokeh
 fastapi
 uvicorn[standard]

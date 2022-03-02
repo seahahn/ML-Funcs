@@ -1,14 +1,27 @@
-from copy import copy
 from typing import Optional
-from fastapi import Body, Request, Query
+from fastapi import Request, Query
 import json
-import numpy as np
 import pandas as pd
+# import modin.pandas as pd
 
+FUNCTIONS = {
+    "sum"   : lambda x: x.sum,
+    "count" : lambda x: x.count,
+    "mean"  : lambda x: x.mean,
+    "min"   : lambda x: x.min,
+    "max"   : lambda x: x.max,
+    "std"   : lambda x: x.std,
+    "median": lambda x: x.median,
+}
 
 def boolean(x):
     if   x.lower() == "true" : return True
     elif x.lower() == "false": return False
+
+
+# def split(x):
+#     try   : return [i.strip() for i in x.split(",") if i.strip() != ""]
+#     except: return False
 
 
 async def set_transpose(item: Request) -> str:
@@ -26,11 +39,15 @@ async def set_groupby(
     group_keys: Optional[str] = Query("True",  max_length=50),
     observed:   Optional[str] = Query("False", max_length=50),
     dropna:     Optional[str] = Query("True",  max_length=50)
+<<<<<<< HEAD
     # level:      Optional[str] = Query(None,  max_length=50), # MultiIndex 에서 사용하는 것!
+=======
+    # level:      Optional[str] = Query(None,    max_length=50), # MultiIndex 에서 사용하는 것! 
+>>>>>>> cbe80c8dca3ad6b6fd91443b3a33be14abb4106c
 ) -> str:
     """pandas.DataFrame.groupby(by).func() 결과를 리턴하는 함수
     ```
-    available function = sum, count, mean, min, max, std, median, size
+    available function = sum, count, mean, min, max, std, median
     by는 반드시 존재하는 컬럼명을 쉼표로 구분해서 입력해야 한다. 1개만 입력할 경우 쉽표 X
     axis = 0(row), 1(columns)
     as_index, sort, group_keys, observed, dropna = bool. true나 false가 입력되어야 한다.
@@ -39,7 +56,7 @@ async def set_groupby(
     ```
     Args:
     ```
-    func       (str,     required): should be in [sum, count, mean, min, max, std, median, size]
+    func       (str,     required): should be in [sum, count, mean, min, max, std, median]
     item       (Request, required): JSON
     by         (str,     required): should be string array(column names) divied by ","
     *
@@ -55,13 +72,24 @@ async def set_groupby(
     str: JSON
     ```
     """
+    axis       = 0       if axis       == "" else axis
+    as_index   = "True"  if as_index   == "" else as_index
+    sort       = "True"  if sort       == "" else sort
+    group_keys = "True"  if group_keys == "" else group_keys
+    observed   = "False" if observed   == "" else observed
+    dropna     = "True"  if dropna     == "" else dropna
 
     ## func
-    func_list = ["sum", "count", "mean", "min", "max", "std", "median", "size"]
     func = func.lower()
+<<<<<<< HEAD
     if not func in func_list:
         return f'"{func}" is invalid function. "func" should be in {func_list}'
 
+=======
+    if not func in FUNCTIONS:
+        return f'"{func}" is invalid function. "func" should be in {FUNCTIONS}'
+    
+>>>>>>> cbe80c8dca3ad6b6fd91443b3a33be14abb4106c
     df = pd.read_json(await item.json())
 
     ## by
@@ -120,6 +148,7 @@ async def set_groupby(
         observed   = observed,
         dropna     = dropna
     )
+<<<<<<< HEAD
 
     functions = {
         "sum"   : df_group.sum,
@@ -133,6 +162,10 @@ async def set_groupby(
     }
 
     return functions[func]().to_json(orient="records")
+=======
+    
+    return FUNCTIONS[func](df_group).reset_index().to_json(orient="records")
+>>>>>>> cbe80c8dca3ad6b6fd91443b3a33be14abb4106c
 
 
 async def set_drop(
@@ -166,6 +199,10 @@ async def set_drop(
     str: JSON
     ```
     """
+
+    axis   = 0       if axis   == "" else axis
+    errors = "raise" if errors == "" else errors
+
     ## errors
     errors = errors.lower()
     if errors not in ["raise", "ignore"]:
@@ -186,11 +223,19 @@ async def set_drop(
         #     return '"labels" is a required parameter.'
         labels = [i.strip() for i in labels.split(",") if i.strip() != ""]
         if errors == "raise":
+<<<<<<< HEAD
             if axis:
                 cols = df.columns
                 if str(cols.dtype) != "object": labels = [int(i) for i in labels]
                 cols = set(cols)
                 error_list = [i for i in labels if i not in cols]
+=======
+            if axis: 
+                dfcols = df.columns
+                if str(dfcols.dtype) != "object": labels = [int(i) for i in labels]
+                dfcols = set(dfcols)
+                error_list = [i for i in labels if i not in dfcols]
+>>>>>>> cbe80c8dca3ad6b6fd91443b3a33be14abb4106c
             else:
                 idxs = df.index
                 if str(idxs.dtype) != "object": labels = [int(i) for i in labels]
@@ -238,6 +283,12 @@ async def set_dropna(
     str: JSON
     ```
     """
+
+    axis   = 0     if axis   == "" else axis
+    how    = 'any' if how    == "" else how
+    thresh = None  if thresh == "" else thresh
+    subset = None  if subset == "" else subset
+
     ## axis
     try:
         axis = int(axis)
@@ -316,6 +367,9 @@ async def set_rename(
     str: JSON
     ```
     """
+    copy   = "true"   if copy   == "" else copy
+    errors = "ignore" if errors == "" else errors
+
     df = pd.read_json(await item.json())
 
     ## keys
@@ -390,6 +444,13 @@ async def set_sort_values(
     str: JSON
     ```
     """
+    axis   = 0           if axis   == "" else axis
+    ascd   = "true"      if ascd   == "" else ascd
+    kind   = "quicksort" if kind   == "" else kind
+    na_pos = "last"      if na_pos == "" else na_pos
+    ig_idx = "false"     if ig_idx == "" else ig_idx
+    key    = None        if key    == "" else key
+
     df = pd.read_json(await item.json())
 
     ## by
@@ -400,6 +461,16 @@ async def set_sort_values(
             return f'"by" should be string array(column names) divied by ","\nlist not in DataFrame columns: {error_list}'
     except:
         return '"by" should be string array(column names) divied by ","'
+<<<<<<< HEAD
+=======
+    
+    ## axis
+    try:
+        axis = int(axis)
+        if axis not in [0, 1]: return '"axis" should be 0, 1. row(0), column(1)'
+    except:
+        return '"axis" should be 0, 1. row(0), column(1)'
+>>>>>>> cbe80c8dca3ad6b6fd91443b3a33be14abb4106c
 
     ## ascd: ascending
     ascd = boolean(ascd)
@@ -483,9 +554,22 @@ async def set_merge(
     str: JSON
     ```
     """
-    js = json.loads(await item.json())
-    df1 = pd.DataFrame(js["item1"])
-    df2 = pd.DataFrame(js["item2"])
+    how         = "inner" if how         == "" else how
+    on          = None    if on          == "" else on
+    left_on     = None    if left_on     == "" else left_on
+    right_on    = None    if right_on    == "" else right_on
+    left_index  = "false" if left_index  == "" else left_index
+    right_index = "false" if right_index == "" else right_index
+    sort        = "false" if sort        == "" else sort
+    left_suf    = "_x"    if left_suf    == "" else left_suf
+    right_suf   = "_y"    if right_suf   == "" else right_suf
+    copy        = "true"  if copy        == "" else copy
+    indicator   = "false" if indicator   == "" else indicator
+    validate    = None    if validate    == "" else validate
+
+    item = await item.json()
+    df_left = pd.read_json(item["left"])
+    df_right = pd.read_json(item["right"])
 
     ## how
     if how not in {"left", "right", "outer", "inner", "cross"}:
@@ -498,10 +582,10 @@ async def set_merge(
     if on is not None:
         try:
             on = [i.strip() for i in on.split(",") if i.strip() != ""]
-            error_list = [i for i in on if i not in df1.columns]
+            error_list = [i for i in on if i not in df_left.columns]
             if error_list:
                 return f'"on" should be string array(column names) divied by ","\nlist not in DataFrame1 columns: {error_list}'
-            error_list = [i for i in on if i not in df2.columns]
+            error_list = [i for i in on if i not in df_right.columns]
             if error_list:
                 return f'"on" should be string array(column names) divied by ","\nlist not in DataFrame2 columns: {error_list}'
         except:
@@ -511,7 +595,7 @@ async def set_merge(
     if left_on is not None:
         try:
             left_on = [i.strip() for i in left_on.split(",") if i.strip() != ""]
-            error_list = [i for i in left_on if i not in df1.columns]
+            error_list = [i for i in left_on if i not in df_left.columns]
             if error_list:
                 return f'"left_on" should be string array(column names) divied by ","\nlist not in DataFrame1 columns: {error_list}'
         except:
@@ -521,7 +605,7 @@ async def set_merge(
     if right_on is not None:
         try:
             right_on = [i.strip() for i in right_on.split(",") if i.strip() != ""]
-            error_list = [i for i in right_on if i not in df2.columns]
+            error_list = [i for i in right_on if i not in df_right.columns]
             if error_list:
                 return f'"on" should be string array(column names) divied by ","\nlist not in DataFrame2 columns: {error_list}'
         except:
@@ -560,8 +644,8 @@ async def set_merge(
         if validate not in {"1:1", "1:m", "m:1", "m:m", "one_to_one", "one_to_many", "many_to_one", "many_to_many"}:
             return f'"validate" should be ["1:1", "1:m", "m:1", "m:m", "one_to_one", "one_to_many", "many_to_one", "many_to_many"]. current validate = {validate}'
 
-    return df1.merge(
-        right        = df2,
+    return df_left.merge(
+        right        = df_right,
         how          = how,
         on           = on,          #: IndexLabel | None = None,
         left_on      = left_on,     #: IndexLabel | None = None,
@@ -612,12 +696,22 @@ async def set_concat(
     str: JSON
     ```
     """
-    js = json.loads(await item.json())
-    df1 = pd.DataFrame(js["item1"])
-    df2 = pd.DataFrame(js["item2"])
+    axis       = 0       if axis       == "" else axis
+    join       = "outer" if join       == "" else join
+    ig_idx     = "false" if ig_idx     == "" else ig_idx
+    keys       = None    if keys       == "" else keys
+    # levels     = None    if levels     == "" else levels
+    names      = None    if names      == "" else names
+    veri_integ = "false" if veri_integ == "" else veri_integ
+    sort       = "false" if sort       == "" else sort
+    copy       = "true"  if copy       == "" else copy
 
-    if type(df1) == type(df2) == pd.DataFrame:
-        objs = [df1, df2]
+    item = await item.json()
+    df_left = pd.read_json(item["left"])
+    df_right = pd.read_json(item["right"])
+
+    if type(df_left) == type(df_right) == pd.DataFrame:
+        objs = [df_left, df_right]
     else:
         return "merge must be needed two DataFrame"
 
@@ -644,10 +738,8 @@ async def set_concat(
     #      1    d
     #  dtype: object
     if keys is not None:
-        try:
-            keys = [i.strip() for i in keys.split(",") if i.strip() != ""]
-        except:
-            return '"keys" should be string array(grouped index names) divied by ","'
+        try   : keys = [i.strip() for i in keys.split(",") if i.strip() != ""]
+        except: return '"keys" should be string array(grouped index names) divied by ","'
 
     ## levels
     # 멀티인덱스 사용할 때 필요함. 추후 구현 예정
@@ -662,10 +754,8 @@ async def set_concat(
     #              | 1         d
     #  dtype: object
     if names is not None:
-        try:
-            names = [i.strip() for i in names.split(",") if i.strip() != ""]
-        except:
-            return '"names" should be string array(grouped index`s column names) divied by ","'
+        try   : names = [i.strip() for i in names.split(",") if i.strip() != ""]
+        except: return '"names" should be string array(grouped index`s column names) divied by ","'
 
     ## veri_integ => verify_integrity
     #  Check whether the new concatenated axis contains duplicates.
@@ -695,28 +785,85 @@ async def set_concat(
     ).to_json(orient="records")
 
 
+from collections import deque
+
 async def set_column(
-    item: Request,
-    col : str,
+    item    : Request,
+    col     : str,
     *,
-    cols: Optional[str] = Query(None, max_length=50),
-    math: Optional[str] = Query(None, max_length=50),
-    func: Optional[str] = Query(None, max_length=50),
+    cols    : Optional[str] = Query(None, max_length=50), # for func
+    col_from: Optional[str] = Query(None, max_length=50), # for func
+    col_to  : Optional[str] = Query(None, max_length=50), # for func
+    func    : Optional[str] = Query(None, max_length=50),
+    cols_ops: Optional[str] = Query(None, max_length=50),
 ) -> str:
+<<<<<<< HEAD
+=======
+    """
+    ```
+    item은 입력받을 dataframe,
+    col은 새로 생성 또는 값을 변경할 컬럼 명.(기존 컬럼에 있으면 기존 컬럼을 변경하고 아니면 새로 생성)
+
+    사용 방법 2가지
+    1. cols or col_from:col_to / func
+    2. cols_ops
+
+    둘 다 동시에 사용할 수 없음
+
+    
+    ※ func 사용시 유의사항
+    1. cols 를 사용하면 col_from:col_to 는 사용할 수 없습니다. 둘 중 하나 사용 가능
+    2. func는 다음 중 하나여야 합니다. ["sum", "count", "mean", "min", "max", "std", "median"]
+
+
+    ※ cols_ops 사용시 유의사항
+    1. column 명이 숫자일 경우, 컬럼을 연산하라는 것인지 숫자를 연산하라는 것인지 구분이 불가능합니다.
+    (키워드 약속하면 구분해서 처리할 수는 있습니다.)
+    2. + => %2b 로 파라미터를 보내셔야합니다
+    3. 반드시 column 또는 숫자로 시작해서 column 또는 숫자로 끝나야 합니다.
+    4. 홀수 자리는 반드시 연산자가 와야 합니다.(^, /, *, -, +)
+    ```
+    Args:
+    ```
+    item     (Request, required): JSON
+    col      (str,     required): 새로 생성하거나 변경할 컬럼 명
+    *
+    cols     (str,     optional) = Default: None, 쉼표로 구분된 컬럼명(반드시 df에 포함되어 있어야 함) funt 쓸 때 사용
+    col_from (str,     optional) = Default: None, funt 쓸 때 사용
+    col_to   (str,     optional) = Default: None, funt 쓸 때 사용
+    func     (str,     optional) = Default: None, ["sum", "count", "mean", "min", "max", "std", "median"] 중 하나
+    cols_ops (str,     optional) = Default: None, 쉼표로 구분된 컬럼or숫자와 연산자(^, /, *, -, +)
+    ```
+    Returns:
+    ```
+    str: JSON
+    ```
+    """
+    cols     = None if cols     == "" else cols
+    col_from = None if col_from == "" else col_from
+    col_to   = None if col_to   == "" else col_to
+    func     = None if func     == "" else func
+    cols_ops = None if cols_ops == "" else cols_ops
+>>>>>>> cbe80c8dca3ad6b6fd91443b3a33be14abb4106c
 
     df = pd.read_json(await item.json())
-    cols = [i.strip() for i in cols.split(",") if i.strip() != ""]
-    math = [i.strip() for i in math.split(",") if i.strip() != ""]
+    dfcols = set(df.columns)
     # left: df[col], right: some function
     # df[col] =
 
-    # cols = col1,col2,col3....
-    # math = + - x /
-    # func = sum, std, mean ...
+    if cols_ops:
+        # cols_ops
+        operators = {
+            "^" : lambda x, y: x ** y,
+            "/" : lambda x, y: x / y,
+            "*" : lambda x, y: x * y,
+            "-" : lambda x, y: x - y,
+            "+" : lambda x, y: x + y,
+        }
 
-    # cols + math
-    # df[col] = (((df[col1] + df[col2]) - df[col3]) * df[col4])
+        deq = deque()
 
+<<<<<<< HEAD
     maths = {
         "add" : lambda x, y: x + y,
         "mul" : lambda x, y: x * y,
@@ -731,3 +878,77 @@ async def set_column(
         left = maths[x](left, right)
     df[col] = left
     print(df[col])
+=======
+        if cols_ops:
+            try   : cols_ops = [i.strip() for i in cols_ops.split(",") if i.strip() != ""]
+            except: return '"cols_ops" should be array(column names and operators) divied by ","'
+            for i, v in enumerate(cols_ops):
+                if i%2 == 0:
+                    if v in dfcols: deq.append(df[v]) # df columns이면 시리즈로
+                    else : 
+                        try   : deq.append(float(v))  # 아니면 그냥 numeric으로
+                        except: return f'"{v}" is not in columns of DataFrame. It should be in {dfcols}'
+                else:
+                    deq.append(v)
+
+        for op in operators:    # 모든 연산자에 대해 우선순위 대로
+            cols_ops = deq
+            deq = deque()
+            while len(cols_ops) != 0:
+                cur = cols_ops.popleft()
+                if type(cur) is str and cur == op:
+                    left = deq.pop()
+                    right = cols_ops.popleft()
+                    cur = operators[cur](left, right)
+                deq.append(cur)
+        
+        df[col] = deq.pop()
+
+    else:
+        ## func
+        func = func.lower()
+        if not func in FUNCTIONS:
+            return f'"{func}" is invalid function. "func" should be in {FUNCTIONS}'
+        
+        # cols = col1,col2,col3....
+        # math = + - x /
+        # func = sum, std, mean ...
+        if str(df.columns.dtype) == "int64":
+            if cols is None:
+                if col_from is not None: 
+                    try   : col_from = int(col_from)
+                    except: return "column type is int. col_from should be int."
+                if col_to is not None: 
+                    try   : col_to = int(col_to)
+                    except: return "column type is int. col_to should be int."
+            else:
+                col_from = col_to = None
+                try   : cols = [int(i) for i in cols.split(",") if i.strip() != ""]
+                except: return "column type is int. cols should be int."
+        else:
+            if cols is not None:
+                try   : cols = [i.strip() for i in cols.split(",") if i.strip() != ""]
+                except: return '"cols" should be array(column names) divied by ","'
+
+
+        if cols     and not set(cols)<= dfcols: return f'"{cols}" is not in columns of DataFrame. It should be in {dfcols}'
+        if col_from and col_from not in dfcols: return f'"{col_from}" is not in columns of DataFrame. It should be in {dfcols}'
+        if col_to   and col_to   not in dfcols: return f'"{col_to}" is not in columns of DataFrame. It should be in {dfcols}'
+
+
+
+        df_func = df[cols] if cols else df[:,col_from:col_to]
+        df[col] = FUNCTIONS[func](df_func)(axis=1)
+
+    return df.to_json(orient="records")
+
+
+async def set_astype(item: Request, col:str, dtype:str) -> str:
+    if dtype not in ["int", "float", "category", "object"]:
+        return f"{dtype}: 올바르지 않은 데이터 타입"
+    df = pd.read_json(await item.json())
+    if col not in set(df.columns):
+        return f"{col}: 존재하지 않는 컬럼"
+    df[col] = df[col].astype(dtype)
+    return df.to_json(orient="records")
+>>>>>>> cbe80c8dca3ad6b6fd91443b3a33be14abb4106c
