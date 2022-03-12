@@ -15,14 +15,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
 from functions import (
     create_upload_file,
 
@@ -93,9 +85,9 @@ feature_target_split = app.post("/dataframe/feature_target_split")(feature_targe
 train_test_split     = app.post("/dataframe/train_test_split")    (train_test_split)
 
 
-box_plot     = app.get("/plot/boxplot")(box_plot)
-hist_plot    = app.get("/plot/histplot")(hist_plot)
-count_plot   = app.get("/plot/countplot")(count_plot)
-scatter_plot = app.get("/plot/scatterplot")(scatter_plot)
+box_plot     = app.post("/plot/boxplot")(box_plot)
+hist_plot    = app.post("/plot/histplot")(hist_plot)
+count_plot   = app.post("/plot/countplot")(count_plot)
+scatter_plot = app.post("/plot/scatterplot")(scatter_plot)
 
 
