@@ -26,33 +26,33 @@ app.add_middleware(
 from functions import (
     create_upload_file,
 
-    get_head,
-    get_tail,
-    get_shape,
-    get_dtype,
-    get_columns,
-    get_unique,
+    head, 
+    tail, 
+    shape,
+    dtype,
+    columns,
+    unique,
     # get_unique_column,
-    get_na,
-    get_corr,
-    get_describe,
-    get_col_condition,
-    get_loc,
-    get_iloc,
+    isna,
+    corr,
+    describe,
+    col_condition,
+    loc,
+    iloc,
 
-    set_transpose,
-    set_groupby,
-    set_drop,
-    set_dropna,
-    set_rename,
-    set_sort_values,
-    set_merge,
-    set_concat,
+    transpose,
+    groupby,
+    drop,
+    dropna,
+    rename,
+    sort_values,
+    merge,
+    concat,
     set_column,
-    set_astype,
+    astype,
 
-    set_feature_target_split,
-    set_train_test_split,
+    feature_target_split,
+    train_test_split,
 )
 
 from visualization import (
@@ -63,40 +63,39 @@ from visualization import (
     )
 
 create_upload_file = app.post("/uploadfile")               (create_upload_file)
-get_head           = app.post("/dataframe/head")           (get_head)
-get_tail           = app.post("/dataframe/tail")           (get_tail)
-get_shape          = app.post("/dataframe/shape")          (get_shape)
-get_dtype          = app.post("/dataframe/dtype")          (get_dtype)
-get_columns        = app.post("/dataframe/columns")        (get_columns)
-get_unique         = app.post("/dataframe/unique")         (get_unique)
+head               = app.post("/dataframe/head")           (head)
+tail               = app.post("/dataframe/tail")           (tail)
+shape              = app.post("/dataframe/shape")          (shape)
+dtype              = app.post("/dataframe/dtype")          (dtype)
+columns            = app.post("/dataframe/columns")        (columns)
+unique             = app.post("/dataframe/unique")         (unique)
 # get_unique_column  = app.post("/dataframe/unique/{column}")(get_unique_column)
-get_na             = app.post("/dataframe/isna")           (get_na)
-get_corr           = app.post("/dataframe/corr")           (get_corr)
-get_describe       = app.post("/dataframe/describe")       (get_describe)
-get_col_condition  = app.post("/dataframe/col_condition")  (get_col_condition)
-get_loc            = app.post("/dataframe/loc")            (get_loc)
-get_iloc           = app.post("/dataframe/iloc")           (get_iloc)
+isna               = app.post("/dataframe/isna")           (isna)
+corr               = app.post("/dataframe/corr")           (corr)
+describe           = app.post("/dataframe/describe")       (describe)
+col_condition      = app.post("/dataframe/col_condition")  (col_condition)
+loc                = app.post("/dataframe/loc")            (loc)
+iloc               = app.post("/dataframe/iloc")           (iloc)
 
-set_transpose      = app.post("/dataframe/transpose")      (set_transpose)
-set_groupby        = app.post("/dataframe/groupby")        (set_groupby)
-set_drop           = app.post("/dataframe/drop")           (set_drop)
-set_dropna         = app.post("/dataframe/dropna")         (set_dropna)
-set_rename         = app.post("/dataframe/rename")         (set_rename)
-set_sort_values    = app.post("/dataframe/sort_values")    (set_sort_values)
+transpose          = app.post("/dataframe/transpose")      (transpose)
+groupby            = app.post("/dataframe/groupby")        (groupby)
+drop               = app.post("/dataframe/drop")           (drop)
+dropna             = app.post("/dataframe/dropna")         (dropna)
+rename             = app.post("/dataframe/rename")         (rename)
+sort_values        = app.post("/dataframe/sort_values")    (sort_values)
 # set_sort_index     = app.post("/dataframe/sort/index")     (set_sort_index)
-set_merge          = app.post("/dataframe/merge")          (set_merge)
-set_concat         = app.post("/dataframe/concat")         (set_concat)
+merge              = app.post("/dataframe/merge")          (merge)
+concat             = app.post("/dataframe/concat")         (concat)
 set_column         = app.post("/dataframe/set_column")     (set_column)
-set_astype         = app.post("/dataframe/astype")         (set_astype)
+astype             = app.post("/dataframe/astype")         (astype)
 
-set_feature_target_split = app.post("/dataframe/feature_target_split")(set_feature_target_split)
-set_train_test_split     = app.post("/dataframe/train_test_split")    (set_train_test_split)
+feature_target_split = app.post("/dataframe/feature_target_split")(feature_target_split)
+train_test_split     = app.post("/dataframe/train_test_split")    (train_test_split)
 
 
-
-box_plot = app.post("/plot/boxplot")(box_plot)
-hist_plot = app.post("/plot/histplot")(hist_plot)
-count_plot = app.post("/plot/countplot")(count_plot)
-scatter_plot = app.post("/plot/scatterplot")(scatter_plot)
+box_plot     = app.get("/plot/boxplot")(box_plot)
+hist_plot    = app.get("/plot/histplot")(hist_plot)
+count_plot   = app.get("/plot/countplot")(count_plot)
+scatter_plot = app.get("/plot/scatterplot")(scatter_plot)
 
 

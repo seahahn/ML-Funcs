@@ -7,15 +7,18 @@ from sklearn.model_selection import train_test_split
 from category_encoders import OneHotEncoder, OrdinalEncoder, TargetEncoder
 # import modin.pandas as pd
 
-def boolean(x):
-    if   x.lower() == "true" : return True
-    elif x.lower() == "false": return False
+from .internal_func import (
+    boolean,
+    isint,
+    check_error
+)
 
 
-async def set_feature_target_split(
+@check_error
+async def feature_target_split(
     item : Request,
     cols : str
-) -> str:
+) -> tuple:
     """
     ```python
     # 타겟과 피쳐를 나누는 함수
@@ -36,19 +39,20 @@ async def set_feature_target_split(
 
     dfcols = set(df.columns)
     try:    cols = [i.strip() for i in cols.split(",") if i.strip() != ""]
-    except: return f"올바르지 않은 입력: {cols}"
-    if not set(cols) <= dfcols: return f'"{cols}" is not in columns of DataFrame. It should be in {dfcols}'
+    except: return False, f"올바르지 않은 입력: {cols}"
+    if not set(cols) <= dfcols: return False, f'"{cols}" is not in columns of DataFrame. It should be in {dfcols}'
 
     y = df[cols]
     X = df.drop(cols, axis=1)
 
-    return json.dumps( {
+    return True, json.dumps( {
         "X": X.to_json(orient="records"),
         "y": y.to_json(orient="records"),
     } )
 
 
-async def set_train_test_split(
+@check_error
+async def train_test_split(
     item        : Request,
     *,
     test_size   : Optional[str] = Query(None,    max_length=50),
@@ -59,7 +63,7 @@ async def set_train_test_split(
     valid       : Optional[str] = Query("false", max_length=50),
     valid_size  : Optional[str] = Query(None,    max_length=50),
     # v_train_size: Optional[str] = Query(None,    max_length=50),
-) -> str:
+) -> tuple:
     """
     ```python
     X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(X, y)
@@ -107,8 +111,8 @@ async def set_train_test_split(
         try:
             test_size = float(test_size)
             if test_size <= 0 or test_size >= 1:
-                return f'"test_size" should be float between 0, 1(not equal). current {test_size}'
-        except: return f'"test_size" should be float between 0, 1(not equal). current {test_size}'
+                return False, f'"test_size" should be float between 0, 1(not equal). current {test_size}'
+        except: return False, f'"test_size" should be float between 0, 1(not equal). current {test_size}'
 
     # ## train_size:   0 < train_size < 1 인 float
     # if train_size is not None:
@@ -116,10 +120,10 @@ async def set_train_test_split(
     #         try:
     #             train_size = float(train_size)
     #             if train_size <= 0 or train_size >= 1:
-    #                 return f'"train_size" should be float between 0, 1(not equal). current {train_size}'
-    #         except: return f'"train_size" should be float between 0, 1(not equal). current {train_size}'
+    #                 return False, f'"train_size" should be float between 0, 1(not equal). current {train_size}'
+    #         except: return False, f'"train_size" should be float between 0, 1(not equal). current {train_size}'
     #     else:
-    #         return "Can only use train_size when test_size is None"
+    #         return False, "Can only use train_size when test_size is None"
 
     ## random_state: 랜덤 시드. int
     try: random_state = int(random_state)
@@ -127,7 +131,7 @@ async def set_train_test_split(
 
     ## shuffle:      bool 셔플 여부
     shuffle = boolean(shuffle)
-    if shuffle is None: return '"shuffle" should be bool, "true" or "false"'
+    if shuffle is None: return False, '"shuffle" should be bool, "true" or "false"'
 
     ## stratify:     특정 값의 비율을 맞춰서 나눈다.
         # stratify : array-like, default=None
@@ -135,11 +139,11 @@ async def set_train_test_split(
         # the class labels.
         # Read more in the :ref:`User Guide <stratification>`.
     stratify = boolean(stratify)
-    if stratify is None: return '"stratify" should be bool, "true" or "false"'
+    if stratify is None: return False, '"stratify" should be bool, "true" or "false"'
 
 
     valid = boolean(valid)
-    if valid is None: return '"valid" should be bool, "true" or "false"'
+    if valid is None: return False, '"valid" should be bool, "true" or "false"'
 
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, # *arrays
@@ -155,11 +159,11 @@ async def set_train_test_split(
             try:
                 valid_size = float(valid_size)
                 if valid_size <= 0 or valid_size >= 1:
-                    return f'"valid_size" should be float between 0, 1(not equal). current {valid_size}'
-            except: return f'"valid_size" should be float between 0, 1(not equal). current {valid_size}'
+                    return False, f'"valid_size" should be float between 0, 1(not equal). current {valid_size}'
+            except: return False, f'"valid_size" should be float between 0, 1(not equal). current {valid_size}'
         valid_size = valid_size/(1-test_size)
         if test_size + valid_size >= 1:
-            return '"test_size" + "valid_size" should be less than 1'
+            return False, '"test_size" + "valid_size" should be less than 1'
         X_train, X_valid, y_train, y_valid = train_test_split(
             X_train, y_train, # *arrays
             test_size    = valid_size,
@@ -168,7 +172,7 @@ async def set_train_test_split(
             shuffle      = shuffle,
             stratify     = y_train if stratify else None,
         )
-        return json.dumps( {
+        return True, json.dumps( {
             "X_train": X_train.to_json(orient="records"),
             "X_valid": X_valid.to_json(orient="records"),
             "X_test" : X_test.to_json(orient="records"),
@@ -181,7 +185,7 @@ async def set_train_test_split(
     # shuffle  = False,
     # stratify = None
 
-    return json.dumps( {
+    return True, json.dumps( {
         "X_train": X_train.to_json(orient="records"),
         "X_test" : X_test.to_json(orient="records"),
         "y_train": y_train.to_json(orient="records"),
@@ -189,6 +193,7 @@ async def set_train_test_split(
     } )
 
 
+# @check_error
 # async def set_one_hot_encoder(
 #     item          : Request,
 #     *,
@@ -199,7 +204,7 @@ async def set_train_test_split(
 #     handle_missing: Optional[str] = Query('value', max_length=50),
 #     handle_unknown: Optional[str] = Query('value', max_length=50),
 #     use_cat_names : Optional[str] = Query(False,   max_length=50),
-# ) -> str:
+# ) -> tuple:
 #     dfs = [pd.read_json(i) for i in json.loads(await item.json())]
 
 #     onehot = OneHotEncoder(
@@ -217,6 +222,7 @@ async def set_train_test_split(
 #         df_encoded.append(onehot.transform(i))
 
 
+# @check_error
 # async def set_ordinal_encoder(
 #     item          : Request,
 #     *,
@@ -227,7 +233,7 @@ async def set_train_test_split(
 #     return_df     : Optional[str] = Query(True,    max_length=50),
 #     handle_unknown: Optional[str] = Query('value', max_length=50),
 #     handle_missing: Optional[str] = Query('value', max_length=50),
-# ) -> str:
+# ) -> tuple:
 #     """_summary_
 
 #     Args:
@@ -262,7 +268,7 @@ async def set_train_test_split(
 #         df_encoded.append(ordinal.transform(i))
 
 
-
+# @check_error
 # async def set_target_encoder(
 #     item            : Request,
 #     *,
@@ -274,7 +280,7 @@ async def set_train_test_split(
 #     handle_unknown  : Optional[str] = Query('value', max_length=50),
 #     min_samples_leaf: Optional[str] = Query(1,       max_length=50),
 #     smoothing       : Optional[str] = Query(1.0,     max_length=50),
-# ) -> str:
+# ) -> tuple:
 #     dfs = [pd.read_json(i) for i in json.loads(await item.json())]
 
 #     target = TargetEncoder(
