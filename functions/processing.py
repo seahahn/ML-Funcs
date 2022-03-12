@@ -28,10 +28,10 @@ async def groupby(
     func:       str,
     *,
     axis:       Optional[str] = Query(0,       max_length=50),
-    as_index:   Optional[str] = Query("True",  max_length=50), 
-    sort:       Optional[str] = Query("True",  max_length=50), 
-    group_keys: Optional[str] = Query("True",  max_length=50), 
-    observed:   Optional[str] = Query("False", max_length=50), 
+    as_index:   Optional[str] = Query("True",  max_length=50),
+    sort:       Optional[str] = Query("True",  max_length=50),
+    group_keys: Optional[str] = Query("True",  max_length=50),
+    observed:   Optional[str] = Query("False", max_length=50),
     dropna:     Optional[str] = Query("True",  max_length=50)
     # level:      Optional[str] = Query(None,    max_length=50), # MultiIndex 에서 사용하는 것! 
 ) -> tuple:
@@ -192,7 +192,7 @@ async def drop(
         #     return False, '"labels" is a required parameter.'
         labels = [i.strip() for i in labels.split(",") if i.strip() != ""]
         if errors == "raise":
-            if axis: 
+            if axis:
                 dfcols = df.columns
                 if str(dfcols.dtype) != "object": labels = [int(i) for i in labels]
                 dfcols = set(dfcols)
@@ -652,7 +652,7 @@ async def concat(
     names      (str,     optional): Default None,    "names" should be string array(grouped index`s column names) divied by ","
     veri_integ (str,     optional): Default "false", true: axis에 따라 중복된 컬럼 또는 row가 있으면 에러 발생! false: 에러 없음
     sort       (str,     optional): Default "false", true: 인덱스 기준으로 정렬한다 false: 정렬 안 한다
-    copy       (str,     optional): Default "true",  
+    copy       (str,     optional): Default "true",
     ```
     Returns:
     ```
@@ -721,7 +721,7 @@ async def concat(
         except: return False, '"names" should be string array(grouped index`s column names) divied by ","'
 
     ## veri_integ => verify_integrity
-    #  Check whether the new concatenated axis contains duplicates. 
+    #  Check whether the new concatenated axis contains duplicates.
     #  This can be very expensive relative to the actual data concatenation.
     veri_integ = boolean(veri_integ)
     if veri_integ is None: return False, '"veri_integ: verify_integrity" should be bool, "true" or "false"'
@@ -770,7 +770,7 @@ async def set_column(
 
     둘 다 동시에 사용할 수 없음
 
-    
+
     ※ func 사용시 유의사항
     1. cols 를 사용하면 col_from:col_to 는 사용할 수 없습니다. 둘 중 하나 사용 가능
     2. func는 다음 중 하나여야 합니다. ["sum", "count", "mean", "min", "max", "std", "median"]
@@ -828,7 +828,7 @@ async def set_column(
             for i, v in enumerate(cols_ops):
                 if i%2 == 0:
                     if v in dfcols: deq.append(df[v]) # df columns이면 시리즈로
-                    else : 
+                    else :
                         try   : deq.append(float(v))  # 아니면 그냥 numeric으로
                         except: return False, f'"{v}" is not in columns of DataFrame. It should be in {dfcols}'
                 else:
@@ -844,7 +844,7 @@ async def set_column(
                     right = cols_ops.popleft()
                     cur = operators[cur](left, right)
                 deq.append(cur)
-        
+
         df[col] = deq.pop()
 
     else:
@@ -858,7 +858,7 @@ async def set_column(
         # func = sum, std, mean ...
         if str(df.columns.dtype) == "int64":
             if cols is None:
-                if col_from is not None: 
+                if col_from is not None:
                     try   : col_from = int(col_from)
                     except: return False, "column type is int. col_from should be int."
                 if col_to is not None: 

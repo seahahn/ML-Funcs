@@ -8,7 +8,7 @@ import pandas as pd
 # import modin.pandas as pd
 import json
 from bokeh.plotting import figure
-from bokeh.embed import components, file_html
+from bokeh.embed import json_item
 from bokeh.resources import CDN
 from fastapi.templating import Jinja2Templates
 import re
@@ -22,7 +22,7 @@ templates = Jinja2Templates(directory="visualization/templates")
 async def box_plot(
     item : Request,                                         #data
     cols : Optional[str] = Query(None, max_length = 30),    #출력하고자하는 특성들(string)
-    tools : Optional[str] = Query("", max_length= 20),      #...
+    tools : Optional[str] = Query("pan,wheel_zoom,box_zoom,save,reset,help", max_length= 20),      #...
     background_fill_color : Optional[str] = Query("#efefef", max_length= 16),
     fill_color1 : Optional[str] = Query("#E08E79", max_length= 16), #상자의 q2 ~ q3까지의 색깔 지정
     fill_color2 : Optional[str] = Query("#3B8686", max_length= 16) #상자의 q1 ~ q2까지의 색깔 지정
@@ -31,6 +31,11 @@ async def box_plot(
     #테스트 셋
     # df = pd.DataFrame({"a" : np.random.randn(2000), "b" : np.random.randn(2000), "c" : np.random.randn(2000), "d": np.random.randn(2000) })
     # cols = "a,b,c,d"
+
+    # 색상값(Hex)의 '#'이 Query Parameter로 전달되면서 "%23"로 변환되어 전달됨. 이를 다시 '#'으로 변환.
+    background_fill_color if background_fill_color.startswith("#") else background_fill_color.replace("%23", "#")
+    fill_color1 if fill_color1.startswith("#") else fill_color1.replace("%23", "#")
+    fill_color2 if fill_color2.startswith("#") else fill_color2.replace("%23", "#")
 
     df = pd.read_json(await item.json())
     # , " "를 구분자로 사용하여 분리하는 정규식을 차후 적용
@@ -50,15 +55,14 @@ async def box_plot(
     #출력하고자하는 특성이 데이터프레임내에 존재하는지 확인
     for col in cols:
         if not col in df.columns:
-            return {
-                "stat" : 200,
-                "body" : f"{col}이라는 특성이 없습니다. 가능 특성{df.columns}"
-            }
+            return f"{col}이라는 특성이 없습니다. 가능 특성{df.columns}"
+
         if df[col].dtype != np.float64 and df[col].dtype != np.float32 and df[col].dtype != np.int64 and df[col].dtype != np.int32:
-             return {
-                "stat" : 200,
-                "body" : f"{col}이라는 특성은 숫자형 자료가 아닙니다."
-            }
+             return f"{col}이라는 특성은 숫자형 자료가 아닙니다."
+
+        if df[col].isna():
+            return f"{col}특성에 결측치가 있습니다."
+
         feature.append(col)
 
     #plot의 x축을 특성명으로 설정
@@ -100,35 +104,37 @@ async def box_plot(
     plot.grid.grid_line_width = 2
     plot.xaxis.major_label_text_font_size="16px"
 
-    script, div = components(plot)
-    return script, div
+    return json.dumps(json_item(plot), ensure_ascii=False)
 
 
 async def hist_plot(
     item : Request,                                         #data
-    col : Optional[str] = Query(None, max_length = 30)
+    col : Optional[str] = Query(None, max_length = 30),
+    tools : Optional[str] = Query("pan,wheel_zoom,box_zoom,save,reset,help", max_length= 20)
 ):
+    '''
+    주의사항 : 결측치가 있는 경우 오류 발생
+    '''
 
     df = pd.read_json(await item.json())
 
     #출력하고자하는 특성이 데이터프레임내에 존재하는지 확인
     if not col in df.columns:
-        return {
-                "stat" : 200,
-                "body" : f"{col}이라는 특성이 없습니다. 가능 특성{df.columns}"
-            }
+        return f"{col}이라는 특성이 없습니다. 가능 특성{df.columns}"
+
 
 
     #col이라는 특성이 숫자형인지 확인
     if df[col].dtype != np.float64 and df[col].dtype != np.float32 and df[col].dtype != np.int64 and df[col].dtype != np.int32:
-            return {
-            "stat" : 200,
-            "body" : f"{col}이라는 특성은 숫자형 자료가 아닙니다."
-        }
+            return f"{col}이라는 특성은 숫자형 자료가 아닙니다."
+
+
+    if df[col].isna():
+        return f"{col}특성에 결측치가 있습니다."
 
     #해당 특성의 데이터를 히스토그램으로 변환
-    hist, edges = np.histogram(df[col], density=True, bins=50)
-    plot = figure(tools='', background_fill_color="#fafafa")
+    hist, edges = np.histogram(df[col], density=True, bins=50) # 데이터셋에 결측치 존재 시 오류 발생
+    plot = figure(tools=tools, background_fill_color="#fafafa")
     plot.quad(top=hist, bottom=0, left=edges[:-1], right=edges[1:], fill_color="navy", line_color="white", alpha=0.5)
 
     plot.y_range.start = 0
@@ -136,8 +142,7 @@ async def hist_plot(
     plot.yaxis.axis_label = "y_col"
     plot.grid.grid_line_color="white"
 
-    script, div = components(plot)
-    return script, div
+    return json.dumps(json_item(plot), ensure_ascii=False)
 
 
 async def count_plot(
@@ -146,6 +151,7 @@ async def count_plot(
     title : Optional[str] = Query("title", max_length = 30),
     height : Optional[str] = Query("250", max_length = 5),
     width : Optional[str] = Query("0.9", max_length = 5),
+    tools : Optional[str] = Query("pan,wheel_zoom,box_zoom,save,reset,help", max_length= 20),
 ):
 
     df = pd.read_json(await item.json())
@@ -153,16 +159,15 @@ async def count_plot(
 
     #출력하고자하는 특성이 데이터프레임내에 존재하는지 확인
     if not col in df.columns:
-        return {
-                "stat" : 200,
-                "body" : f"{col}이라는 특성이 없습니다. 가능 특성{df.columns}"
-            }
+        return f"{col}이라는 특성이 없습니다. 가능 특성{df.columns}"
+
+
     #해당 특성의 데이터 타입이 문자열인지 확인
     if df[col].dtype == np.float64 or df[col].dtype == np.float32 or df[col].dtype == np.int64 or df[col].dtype == np.int32:
-            return {
-            "stat" : 200,
-            "body" : f"{col}이라는 특성은 문자형 자료가 아닙니다."
-        }
+            return f"{col}이라는 특성은 문자형 자료가 아닙니다."
+
+    if df[col].isna():
+        return f"{col}특성에 결측치가 있습니다."
 
     #각 데이터별 갯수
     cnt = df[col].value_counts()
@@ -171,7 +176,7 @@ async def count_plot(
 
     #plot의 길이 및 기타 설정
     height = int(height)
-    plot = figure(tools="", x_range=feature, height=height, title=title)
+    plot = figure(tools=tools, x_range=feature, height=height, title=title)
 
     width = float(width)
     plot.vbar(x=feature, top=cnt, width=width)
@@ -179,15 +184,15 @@ async def count_plot(
     plot.xgrid.grid_line_color = None
     plot.y_range.start = 0
 
-    script, div = components(plot)
-    return script, div
+    return json.dumps(json_item(plot), ensure_ascii=False)
 
 
 
 async def scatter_plot(
     item : Request,
     x_col : Optional[str] = Query(None, max_length = 30),
-    y_col : Optional[str] = Query(None, max_length = 30)
+    y_col : Optional[str] = Query(None, max_length = 30),
+    tools : Optional[str] = Query("pan,wheel_zoom,box_zoom,save,reset,help", max_length= 20),
     ):
 
     #json -> dataframe
@@ -195,17 +200,18 @@ async def scatter_plot(
 
     # x_col이라는 특성이 존재하는지 확인
     if not x_col in df.columns:
-        return {
-                "stat" : 200,
-                "body" : f"{x_col}이라는 특성이 없습니다. 가능 특성{df.columns}"
-            }
+        return f"{x_col}이라는 특성이 없습니다. 가능 특성{df.columns}"
+
 
     # y_col이라는 특성이 존재하는지 확인
     if not y_col in df.columns:
-        return {
-                "stat" : 200,
-                "body" : f"{y_col}이라는 특성이 없습니다. 가능 특성{df.columns}"
-            }
+        return  f"{y_col}이라는 특성이 없습니다. 가능 특성{df.columns}"
+
+    if df[x_col].isna():
+        return f"{x_col}특성에 결측치가 있습니다."
+
+    if df[y_col].isna():
+        return f"{y_col}특성에 결측치가 있습니다."
 
 
     #x_col이라는 특성이 카테고리일때 해당 범주에 맞게 plot을 x범위 설정
@@ -220,8 +226,8 @@ async def scatter_plot(
             y_range = list(df[y_col].unique())
 
 
-    p = figure(tools="", background_fill_color="#efefef", x_range=x_range , y_range=y_range)
-    p.circle(df[x_col], df[y_col], size=2, color="#F38630", fill_alpha=0.6)
+    p = figure(tools=tools, background_fill_color="#efefef", x_range=x_range , y_range=y_range)
+    p.circle(df[x_col], df[y_col], size=4, color="#F38630", fill_alpha=0.6)
 
 
     p.xgrid.grid_line_color = "white"
@@ -229,8 +235,7 @@ async def scatter_plot(
     p.grid.grid_line_width = 2
     p.xaxis.major_label_text_font_size="16px"
 
-    script, div = components(p)
-    return script, div
+    return json.dumps(json_item(p), ensure_ascii=False)
 
 
 async def bar_plot(item : Request):

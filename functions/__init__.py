@@ -35,7 +35,7 @@ from functions.preprocessing import (
 )
 
 __all__ = [
-    "create_upload_file", 
+    "create_upload_file",
 
     "head", 
     "tail", 

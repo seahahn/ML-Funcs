@@ -24,7 +24,7 @@ app.add_middleware(
 )
 
 from functions import (
-    create_upload_file, 
+    create_upload_file,
 
     head, 
     tail, 
@@ -91,7 +91,6 @@ astype             = app.post("/dataframe/astype")         (astype)
 
 feature_target_split = app.post("/dataframe/feature_target_split")(feature_target_split)
 train_test_split     = app.post("/dataframe/train_test_split")    (train_test_split)
-
 
 
 box_plot     = app.get("/plot/boxplot")(box_plot)
