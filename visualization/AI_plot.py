@@ -60,7 +60,7 @@ async def box_plot(
         if df[col].dtype != np.float64 and df[col].dtype != np.float32 and df[col].dtype != np.int64 and df[col].dtype != np.int32:
              return f"{col}이라는 특성은 숫자형 자료가 아닙니다."
 
-        if df[col].isna():
+        if df[col].isna().sum() != 0:
             return f"{col}특성에 결측치가 있습니다."
 
         feature.append(col)
@@ -129,7 +129,7 @@ async def hist_plot(
             return f"{col}이라는 특성은 숫자형 자료가 아닙니다."
 
 
-    if df[col].isna():
+    if df[col].isna().sum() != 0:
         return f"{col}특성에 결측치가 있습니다."
 
     #해당 특성의 데이터를 히스토그램으로 변환
@@ -166,7 +166,7 @@ async def count_plot(
     if df[col].dtype == np.float64 or df[col].dtype == np.float32 or df[col].dtype == np.int64 or df[col].dtype == np.int32:
             return f"{col}이라는 특성은 문자형 자료가 아닙니다."
 
-    if df[col].isna():
+    if df[col].isna().sum() != 0:
         return f"{col}특성에 결측치가 있습니다."
 
     #각 데이터별 갯수
@@ -207,10 +207,10 @@ async def scatter_plot(
     if not y_col in df.columns:
         return  f"{y_col}이라는 특성이 없습니다. 가능 특성{df.columns}"
 
-    if df[x_col].isna():
+    if df[x_col].isna().sum() != 0:
         return f"{x_col}특성에 결측치가 있습니다."
 
-    if df[y_col].isna():
+    if df[y_col].isna().sum() != 0:
         return f"{y_col}특성에 결측치가 있습니다."
 
 
