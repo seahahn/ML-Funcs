@@ -3,7 +3,7 @@ from fastapi import Request, Query
 import json
 import numpy as np
 import pandas as pd
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split as tts
 from category_encoders import OneHotEncoder, OrdinalEncoder, TargetEncoder
 # import modin.pandas as pd
 
@@ -102,9 +102,10 @@ async def train_test_split(
     valid_size   = None    if valid_size   == "" else valid_size
     # v_train_size = None    if v_train_size == "" else v_train_size
 
-    dfs = await item.json()
-    X = pd.read_json(dfs["X"])
-    y = pd.read_json(dfs["y"])
+    item = await item.json()
+    print(item)
+    X = pd.read_json(item["X"])
+    y = pd.read_json(item["y"])
 
     ## test_size:    0 < test_size < 1 인 float
     if test_size is not None:
@@ -126,8 +127,9 @@ async def train_test_split(
     #         return False, "Can only use train_size when test_size is None"
 
     ## random_state: 랜덤 시드. int
-    try: random_state = int(random_state)
-    except: '"random_state" should be int.'
+    if random_state is not None:
+        try: random_state = int(random_state)
+        except: return False, '"random_state" should be int.'
 
     ## shuffle:      bool 셔플 여부
     shuffle = boolean(shuffle)
@@ -145,7 +147,7 @@ async def train_test_split(
     valid = boolean(valid)
     if valid is None: return False, '"valid" should be bool, "true" or "false"'
 
-    X_train, X_test, y_train, y_test = train_test_split(
+    X_train, X_test, y_train, y_test = tts(
         X, y, # *arrays
         test_size    = test_size,
         # train_size   = train_size,
@@ -164,7 +166,7 @@ async def train_test_split(
         valid_size = valid_size/(1-test_size)
         if test_size + valid_size >= 1:
             return False, '"test_size" + "valid_size" should be less than 1'
-        X_train, X_valid, y_train, y_valid = train_test_split(
+        X_train, X_valid, y_train, y_valid = tts(
             X_train, y_train, # *arrays
             test_size    = valid_size,
             # train_size   = train_size,
