@@ -3,9 +3,8 @@ from fastapi import Request, Query
 import json
 import numpy as np
 import pandas as pd
-from sklearn.model_selection import train_test_split as tts
-from category_encoders import OneHotEncoder, OrdinalEncoder, TargetEncoder
 # import modin.pandas as pd
+from sklearn.model_selection import train_test_split as tts
 
 from .internal_func import (
     boolean,
@@ -193,109 +192,3 @@ async def train_test_split(
         "y_train": y_train.to_json(orient="records"),
         "y_test" : y_test.to_json(orient="records"),
     } )
-
-
-# @check_error
-# async def set_one_hot_encoder(
-#     item          : Request,
-#     *,
-#     verbose       : Optional[str] = Query(0,       max_length=50),
-#     cols          : Optional[str] = Query(None,    max_length=50),
-#     drop_invariant: Optional[str] = Query(False,   max_length=50),
-#     return_df     : Optional[str] = Query(True,    max_length=50),
-#     handle_missing: Optional[str] = Query('value', max_length=50),
-#     handle_unknown: Optional[str] = Query('value', max_length=50),
-#     use_cat_names : Optional[str] = Query(False,   max_length=50),
-# ) -> tuple:
-#     dfs = [pd.read_json(i) for i in json.loads(await item.json())]
-
-#     onehot = OneHotEncoder(
-#         verbose=0,
-#         cols=None,
-#         drop_invariant=False,
-#         return_df=True,
-#         handle_missing='value',
-#         handle_unknown='value',
-#         use_cat_names=False
-#     )
-#     df_encoded = []
-#     df_encoded.append(onehot.fit_transform(dfs[0]))
-#     for i in dfs[1:]:
-#         df_encoded.append(onehot.transform(i))
-
-
-# @check_error
-# async def set_ordinal_encoder(
-#     item          : Request,
-#     *,
-#     verbose       : Optional[str] = Query(0,       max_length=50),
-#     mapping       : Optional[str] = Query(None,    max_length=50),
-#     cols          : Optional[str] = Query(None,    max_length=50),
-#     drop_invariant: Optional[str] = Query(False,   max_length=50),
-#     return_df     : Optional[str] = Query(True,    max_length=50),
-#     handle_unknown: Optional[str] = Query('value', max_length=50),
-#     handle_missing: Optional[str] = Query('value', max_length=50),
-# ) -> tuple:
-#     """_summary_
-
-#     Args:
-#         item (Request): _description_
-#         *
-#         verbose (Optional[str], optional): _description_. Defaults to Query(0,       max_length=50).
-#         mapping (Optional[str], optional): _description_. Defaults to Query(None,    max_length=50).
-#         cols (Optional[str], optional): _description_. Defaults to Query(None,    max_length=50).
-#         drop_invariant (Optional[str], optional): _description_. Defaults to Query(False,   max_length=50).
-#         return_df (Optional[str], optional): _description_. Defaults to Query(True,    max_length=50).
-#         handle_unknown (Optional[str], optional): _description_. Defaults to Query('value', max_length=50).
-#         handle_missing (Optional[str], optional): _description_. Defaults to Query('value', max_length=50).
-
-#     Returns:
-#         str: _description_
-#     """
-#     dfs = [pd.read_json(i) for i in json.loads(await item.json())]
-
-#     ordinal = OrdinalEncoder(
-#         verbose=0,
-#         mapping=None,
-#         cols=None,
-#         drop_invariant=False,
-#         return_df=True,
-#         handle_unknown='value',
-#         handle_missing='value'
-#     )
-
-#     df_encoded = []
-#     df_encoded.append(ordinal.fit_transform(dfs[0]))
-#     for i in dfs[1:]:
-#         df_encoded.append(ordinal.transform(i))
-
-
-# @check_error
-# async def set_target_encoder(
-#     item            : Request,
-#     *,
-#     verbose         : Optional[str] = Query(0,       max_length=50),
-#     cols            : Optional[str] = Query(None,    max_length=50),
-#     drop_invariant  : Optional[str] = Query(False,   max_length=50),
-#     return_df       : Optional[str] = Query(True,    max_length=50),
-#     handle_missing  : Optional[str] = Query('value', max_length=50),
-#     handle_unknown  : Optional[str] = Query('value', max_length=50),
-#     min_samples_leaf: Optional[str] = Query(1,       max_length=50),
-#     smoothing       : Optional[str] = Query(1.0,     max_length=50),
-# ) -> tuple:
-#     dfs = [pd.read_json(i) for i in json.loads(await item.json())]
-
-#     target = TargetEncoder(
-#         verbose=0,
-#         cols=None,
-#         drop_invariant=False,
-#         return_df=True,
-#         handle_missing='value',
-#         handle_unknown='value',
-#         min_samples_leaf=1,
-#         smoothing=1.0
-#     )
-#     df_encoded = []
-#     df_encoded.append(target.fit_transform(dfs[0]))
-#     for i in dfs[1:]:
-#         df_encoded.append(target.transform(i))
