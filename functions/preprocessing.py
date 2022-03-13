@@ -3,9 +3,8 @@ from fastapi import Request, Query
 import json
 import numpy as np
 import pandas as pd
-from sklearn.model_selection import train_test_split
-from category_encoders import OneHotEncoder, OrdinalEncoder, TargetEncoder
 # import modin.pandas as pd
+from sklearn.model_selection import train_test_split as tts
 
 from .internal_func import (
     boolean,
@@ -102,9 +101,10 @@ async def train_test_split(
     valid_size   = None    if valid_size   == "" else valid_size
     # v_train_size = None    if v_train_size == "" else v_train_size
 
-    dfs = await item.json()
-    X = pd.read_json(dfs["X"])
-    y = pd.read_json(dfs["y"])
+    item = await item.json()
+    print(item)
+    X = pd.read_json(item["X"])
+    y = pd.read_json(item["y"])
 
     ## test_size:    0 < test_size < 1 인 float
     if test_size is not None:
@@ -126,8 +126,9 @@ async def train_test_split(
     #         return False, "Can only use train_size when test_size is None"
 
     ## random_state: 랜덤 시드. int
-    try: random_state = int(random_state)
-    except: '"random_state" should be int.'
+    if random_state is not None:
+        try: random_state = int(random_state)
+        except: return False, '"random_state" should be int.'
 
     ## shuffle:      bool 셔플 여부
     shuffle = boolean(shuffle)
@@ -145,7 +146,7 @@ async def train_test_split(
     valid = boolean(valid)
     if valid is None: return False, '"valid" should be bool, "true" or "false"'
 
-    X_train, X_test, y_train, y_test = train_test_split(
+    X_train, X_test, y_train, y_test = tts(
         X, y, # *arrays
         test_size    = test_size,
         # train_size   = train_size,
@@ -164,7 +165,7 @@ async def train_test_split(
         valid_size = valid_size/(1-test_size)
         if test_size + valid_size >= 1:
             return False, '"test_size" + "valid_size" should be less than 1'
-        X_train, X_valid, y_train, y_valid = train_test_split(
+        X_train, X_valid, y_train, y_valid = tts(
             X_train, y_train, # *arrays
             test_size    = valid_size,
             # train_size   = train_size,
@@ -191,109 +192,3 @@ async def train_test_split(
         "y_train": y_train.to_json(orient="records"),
         "y_test" : y_test.to_json(orient="records"),
     } )
-
-
-# @check_error
-# async def set_one_hot_encoder(
-#     item          : Request,
-#     *,
-#     verbose       : Optional[str] = Query(0,       max_length=50),
-#     cols          : Optional[str] = Query(None,    max_length=50),
-#     drop_invariant: Optional[str] = Query(False,   max_length=50),
-#     return_df     : Optional[str] = Query(True,    max_length=50),
-#     handle_missing: Optional[str] = Query('value', max_length=50),
-#     handle_unknown: Optional[str] = Query('value', max_length=50),
-#     use_cat_names : Optional[str] = Query(False,   max_length=50),
-# ) -> tuple:
-#     dfs = [pd.read_json(i) for i in json.loads(await item.json())]
-
-#     onehot = OneHotEncoder(
-#         verbose=0,
-#         cols=None,
-#         drop_invariant=False,
-#         return_df=True,
-#         handle_missing='value',
-#         handle_unknown='value',
-#         use_cat_names=False
-#     )
-#     df_encoded = []
-#     df_encoded.append(onehot.fit_transform(dfs[0]))
-#     for i in dfs[1:]:
-#         df_encoded.append(onehot.transform(i))
-
-
-# @check_error
-# async def set_ordinal_encoder(
-#     item          : Request,
-#     *,
-#     verbose       : Optional[str] = Query(0,       max_length=50),
-#     mapping       : Optional[str] = Query(None,    max_length=50),
-#     cols          : Optional[str] = Query(None,    max_length=50),
-#     drop_invariant: Optional[str] = Query(False,   max_length=50),
-#     return_df     : Optional[str] = Query(True,    max_length=50),
-#     handle_unknown: Optional[str] = Query('value', max_length=50),
-#     handle_missing: Optional[str] = Query('value', max_length=50),
-# ) -> tuple:
-#     """_summary_
-
-#     Args:
-#         item (Request): _description_
-#         *
-#         verbose (Optional[str], optional): _description_. Defaults to Query(0,       max_length=50).
-#         mapping (Optional[str], optional): _description_. Defaults to Query(None,    max_length=50).
-#         cols (Optional[str], optional): _description_. Defaults to Query(None,    max_length=50).
-#         drop_invariant (Optional[str], optional): _description_. Defaults to Query(False,   max_length=50).
-#         return_df (Optional[str], optional): _description_. Defaults to Query(True,    max_length=50).
-#         handle_unknown (Optional[str], optional): _description_. Defaults to Query('value', max_length=50).
-#         handle_missing (Optional[str], optional): _description_. Defaults to Query('value', max_length=50).
-
-#     Returns:
-#         str: _description_
-#     """
-#     dfs = [pd.read_json(i) for i in json.loads(await item.json())]
-
-#     ordinal = OrdinalEncoder(
-#         verbose=0,
-#         mapping=None,
-#         cols=None,
-#         drop_invariant=False,
-#         return_df=True,
-#         handle_unknown='value',
-#         handle_missing='value'
-#     )
-
-#     df_encoded = []
-#     df_encoded.append(ordinal.fit_transform(dfs[0]))
-#     for i in dfs[1:]:
-#         df_encoded.append(ordinal.transform(i))
-
-
-# @check_error
-# async def set_target_encoder(
-#     item            : Request,
-#     *,
-#     verbose         : Optional[str] = Query(0,       max_length=50),
-#     cols            : Optional[str] = Query(None,    max_length=50),
-#     drop_invariant  : Optional[str] = Query(False,   max_length=50),
-#     return_df       : Optional[str] = Query(True,    max_length=50),
-#     handle_missing  : Optional[str] = Query('value', max_length=50),
-#     handle_unknown  : Optional[str] = Query('value', max_length=50),
-#     min_samples_leaf: Optional[str] = Query(1,       max_length=50),
-#     smoothing       : Optional[str] = Query(1.0,     max_length=50),
-# ) -> tuple:
-#     dfs = [pd.read_json(i) for i in json.loads(await item.json())]
-
-#     target = TargetEncoder(
-#         verbose=0,
-#         cols=None,
-#         drop_invariant=False,
-#         return_df=True,
-#         handle_missing='value',
-#         handle_unknown='value',
-#         min_samples_leaf=1,
-#         smoothing=1.0
-#     )
-#     df_encoded = []
-#     df_encoded.append(target.fit_transform(dfs[0]))
-#     for i in dfs[1:]:
-#         df_encoded.append(target.transform(i))
