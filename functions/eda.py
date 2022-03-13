@@ -143,7 +143,7 @@ async def corr(
     if col1 and col2:
         return True, df[col1].corr(
             other       = df[col2],
-            method      = method, 
+            method      = method,
             min_periods = req_min
         )
     elif col1:
@@ -180,7 +180,7 @@ async def describe(
     default로 min, 25%, 50%, 75%, max의 데이터를 반환하는데, 이 옵션을 주면
     다른 min, 50%, max에 추가로 다른 퍼센트의 데이터를 볼 수 있습니다.
 
-    입력은 소수(float)의 배열인데, 쉽표로 구분해주시면 됩니다. 
+    입력은 소수(float)의 배열인데, 쉽표로 구분해주시면 됩니다.
     ex) min, 10%, 30%, 50% 70% max를 보려면 => .1,.3,.7
 
     num, obj, cat, date는 해당 자료형을 볼지 안 볼지 결정하는 파라미터입니다.
@@ -217,7 +217,7 @@ async def describe(
 
     if percentiles is not None:
         try:
-            percentiles = [float(i) for i in percentiles.split(",") if i.strip() != ""] 
+            percentiles = [float(i) for i in percentiles.split(",") if i.strip() != ""]
             for i, f in enumerate(percentiles):
                 if 100 > f >= 1:
                     percentiles[i] = f/100
@@ -231,7 +231,7 @@ async def describe(
             return False, "num should be -1, 0, 1"
     except: return False, "num should be -1, 0, 1"
 
-    try:    
+    try:
         obj = int(obj)
         if obj not in [-1, 0, 1]:
             return False, "obj should be -1, 0, 1"
@@ -263,7 +263,7 @@ async def describe(
 
     df = pd.read_json(await item.json())
     chk = {str(i) for i in df.dtypes.unique()}
-    
+
     include = []
     exclude = []
 
@@ -314,12 +314,12 @@ async def col_condition(
 
     # cond1 & cond2 같이 쓸 경우 내부적으로 cond1은 greater than을 가져가고 cond2는 less than를 가져간다.
     # 사용자는 cond1과 cond2의 방향만 다르게 입력하면 된다.
-    
+
     if value1 >= value2:
         df[(df[col] > value1)|(df[col] < value2)]
     else:
         df[(df[col] > value1)&(df[col] < value2)]
-    
+
     # cond2만 사용할 경우 에러를 반환한다.
     # 둘 다 사용할 때 cond1에 eq가 들어가면 에러를 반환한다.
     ```
@@ -330,7 +330,7 @@ async def col_condition(
     *
     cond1  (str,     optional): Default None, 조건1. "eq", "gr", "gr_eq", "le", "le_eq"
     value1 (str,     optional): Default None, 조건1에 대한 값 ex) df.col < value1
-    cond2  (str,     optional): Default None, 조건2. "gr", "gr_eq", "le", "le_eq"; 조건1이 None이면 에러 발생 
+    cond2  (str,     optional): Default None, 조건2. "gr", "gr_eq", "le", "le_eq"; 조건1이 None이면 에러 발생
     value2 (str,     optional): Default None, 조건2에 대한 값 ex) (df.col < value1) | (df.col > value2)
     ```
     Returns:
@@ -344,7 +344,7 @@ async def col_condition(
     value2 = None if value2 == "" else value2
 
     df = pd.read_json(await item.json())
-    
+
     if cond1 not in ["eq", "gr", "gr_eq", "le", "le_eq"]:
         return False, f'"cond1" should be in ["eq", "gr", "gr_eq", "le", "le_eq"], current {cond1}'
     if cond2 and cond2 not in ["gr", "gr_eq", "le", "le_eq"]:
@@ -361,14 +361,12 @@ async def col_condition(
         except: return False, '"value1" should be numeric(int or float).'
     else:
         return False, '"value1" should be used.'
-        
 
     if value2 is not None: 
         if cond2 is None: return False, 'If use "value2", "cond2" should be used.'
         try   : value2 = float(value2)
         except: return False, '"value2" should be numeric(int or float).'
-        
-    
+
     dfcols = list(df.columns)
     if col in dfcols:
         if cond2:
@@ -376,16 +374,16 @@ async def col_condition(
             if cond1[0] == "l":
                 cond2, cond1 = cond1, cond2
                 value2, value1 = value1, value2
-            if   cond1 == "gr"    and cond2 == "le"   : 
+            if   cond1 == "gr"    and cond2 == "le"   :
                 if value1 >= value2: df = df[(df[col] >  value1)|(df[col] <  value2)]
                 else               : df = df[(df[col] >  value1)&(df[col] <  value2)]
             elif cond1 == "gr"    and cond2 == "le_eq":
                 if value1 >= value2: df = df[(df[col] >  value1)|(df[col] <= value2)]
                 else               : df = df[(df[col] >  value1)&(df[col] <= value2)]
-            elif cond1 == "gr_eq" and cond2 == "le"   : 
+            elif cond1 == "gr_eq" and cond2 == "le"   :
                 if value1 >= value2: df = df[(df[col] >= value1)|(df[col] <  value2)]
                 else               : df = df[(df[col] >= value1)&(df[col] <  value2)]
-            elif cond1 == "gr_eq" and cond2 == "le_eq": 
+            elif cond1 == "gr_eq" and cond2 == "le_eq":
                 if value1 >= value2: df = df[(df[col] >= value1)|(df[col] <= value2)]
                 else               : df = df[(df[col] >= value1)&(df[col] <= value2)]
         elif cond1:
@@ -394,7 +392,7 @@ async def col_condition(
             elif cond1 == "gr_eq": df = df[df[col] >= value1]
             elif cond1 == "le"   : df = df[df[col] <  value1]
             elif cond1 == "le_eq": df = df[df[col] <= value1]
-        
+
         # print(df)
         return True, df.to_json(orient="records")
     else:
@@ -446,8 +444,8 @@ async def loc(
     df = pd.read_json(await item.json())
 
     if str(df.index.dtype) == "int64":
-        if idx is None: 
-            if idx_from is not None: 
+        if idx is None:
+            if idx_from is not None:
                 try   : idx_from = int(idx_from)
                 except: return False, "index type is int. idx_from should be int."
             if idx_to is not None: 
@@ -460,10 +458,10 @@ async def loc(
     else:
         if idx is not None:
             idx = [i.strip() for i in idx.split(",") if i.strip() != ""]
-    
+
     if str(df.columns.dtype) == "int64":
         if cols is None:
-            if col_from is not None: 
+            if col_from is not None:
                 try   : col_from = int(col_from)
                 except: return False, "column type is int. col_from should be int."
             if col_to is not None: 
@@ -493,7 +491,7 @@ async def loc(
     elif idx  is None                 : df = df.loc[idx_from:idx_to, cols]
     elif cols is None                 : df = df.loc[idx, col_from:col_to]
     else                              : df = df.loc[idx, cols]
-    
+
     # print(df)
     return True, df.to_json(orient="records")
 
@@ -538,11 +536,11 @@ async def iloc(
     cols      = None if cols     == "" else cols
     col_from  = None if col_from == "" else col_from
     col_to    = None if col_to   == "" else col_to
-    
+
     df = pd.read_json(await item.json())
 
-    if idx is None: 
-        if idx_from is not None: 
+    if idx is None:
+        if idx_from is not None:
             try   : idx_from = int(idx_from)
             except: return False, "idx_from should be int in iloc."
         if idx_to is not None: 
@@ -554,7 +552,7 @@ async def iloc(
         except: return False, "idx should be int in iloc."
 
     if cols is None:
-        if col_from is not None: 
+        if col_from is not None:
             try   : col_from = int(col_from)
             except: return False, "col_from should be int in iloc."
         if col_to is not None: 
@@ -579,6 +577,6 @@ async def iloc(
     elif idx  is None                 : df = df.iloc[idx_from:idx_to, cols]
     elif cols is None                 : df = df.iloc[idx, col_from:col_to]
     else                              : df = df.iloc[idx, cols]
-    
+
     # print(df)
     return True, df.to_json(orient="records")
