@@ -29,17 +29,17 @@ def isint(x:str) -> bool:
 import psycopg2
 
 def save_log(query):
-    # params = json.load(".env")
-    # db = psycopg2.connect(
-    #     **params
-    # )
-    # cursor = db.cursor()
-    # insert_into = """INSERT INTO {schema}.{table}({column}) VALUES ('{data}')"""
-
-    # cursor.execute(query)
+    with open("functions/.env", "r") as f:
+        params = json.load(f)
+    db = psycopg2.connect(
+        **params
+    )
+    cursor = db.cursor()
+    cursor.execute(query)
     print(query)
-
-
+    cursor.close()
+    db.commit()
+    db.close()
 
 from typing import Optional
 from fastapi import Header
@@ -50,21 +50,24 @@ def check_error(func):
     async def wrapper(*args, user_id: Optional[str] = Header(None), **kwargs):
         name = func.__name__
         start = datetime.datetime.now()
-        print(user_id)
         try:
             tf, return_value = await func(*args, **kwargs)
             end = datetime.datetime.now()
             is_worked = 0 if tf else 1
             
-            query = """INSERT INTO {}.{}({}) VALUES ("{}")"""
+            query = f"""INSERT INTO 
+                public.func_log (user_idx, func_code, is_worked, start_time, end_time) 
+                VALUES ({user_id},'{name}',{is_worked}, '{start}', '{end}')"""
             save_log(query)
             return return_value
         except:
-            print(traceback.format_exc())
+            error = traceback.format_exc()
             end = datetime.datetime.now()
-            # Unexpected error
-            query = """비정상적인 동작"""
             is_worked = 2
+            # Unexpected error
+            query = f"""INSERT INTO 
+                public.func_log (user_idx, func_code, is_worked, error_msg, start_time, end_time) 
+                VALUES ({user_id},'{name}',{is_worked}, '{error}', '{start}', '{end}')"""
             save_log(query)
             return traceback.format_exc()
     
