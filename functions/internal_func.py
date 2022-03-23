@@ -32,11 +32,11 @@ import psycopg2
 
 def save_log(query):
     db = psycopg2.connect(
-        username=os.getenv("DB_USER"),
+        user=os.getenv("DB_USER"),
         password=os.getenv("DB_PW"),
         host=os.getenv("DB_HOST"),
         port=os.getenv("DB_PORT"),
-        db_name=os.getenv("DB_NAME")
+        dbname=os.getenv("DB_NAME")
     )
     cursor = db.cursor()
     cursor.execute(query)
