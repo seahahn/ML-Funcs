@@ -1,4 +1,6 @@
-import json
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
 FUNCTIONS = {
     "sum"   : lambda x: x.sum,
@@ -29,10 +31,12 @@ def isint(x:str) -> bool:
 import psycopg2
 
 def save_log(query):
-    with open("functions/.env", "r") as f:
-        params = json.load(f)
     db = psycopg2.connect(
-        **params
+        username=os.getenv("DB_USER"),
+        password=os.getenv("DB_PW"),
+        host=os.getenv("DB_HOST"),
+        port=os.getenv("DB_PORT"),
+        db_name=os.getenv("DB_NAME")
     )
     cursor = db.cursor()
     cursor.execute(query)
@@ -54,9 +58,9 @@ def check_error(func):
             tf, return_value = await func(*args, **kwargs)
             end = datetime.datetime.now()
             is_worked = 0 if tf else 1
-            
-            query = f"""INSERT INTO 
-                public.func_log (user_idx, func_code, is_worked, start_time, end_time) 
+
+            query = f"""INSERT INTO
+                public.func_log (user_idx, func_code, is_worked, start_time, end_time)
                 VALUES ({user_id},'{name}',{is_worked}, '{start}', '{end}')"""
             save_log(query)
             return return_value
@@ -65,12 +69,12 @@ def check_error(func):
             end = datetime.datetime.now()
             is_worked = 2
             # Unexpected error
-            query = f"""INSERT INTO 
-                public.func_log (user_idx, func_code, is_worked, error_msg, start_time, end_time) 
+            query = f"""INSERT INTO
+                public.func_log (user_idx, func_code, is_worked, error_msg, start_time, end_time)
                 VALUES ({user_id},'{name}',{is_worked}, '{error}', '{start}', '{end}')"""
             save_log(query)
             return traceback.format_exc()
-    
+
     ## FastAPI 에서 데코레이터를 사용할 수 있도록 파라미터 수정
     wrapper.__signature__ = inspect.Signature(
         parameters = [
