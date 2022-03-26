@@ -1,0 +1,7 @@
+DB_HOST=localhost
+DB_NAME=postgres
+DB_USER=postgres
+DB_PW=aiplay
+DB_PORT=5432
+
+SECRET_KEY=ka3@w=)8s*8^sg$c3(7pz%)qg&1fv2^2ozkpn%6f4f5mx82rys
