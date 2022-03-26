@@ -4,7 +4,8 @@ from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI()
 
 origins = [
-    "http://localhost:3000" # 포트 지정 안 하면 CORS 에러 발생
+    "http://localhost:3000", # 포트 지정 안 하면 CORS 에러 발생
+    "https://front-web-xi.vercel.app"
 ]
 
 app.add_middleware(
@@ -18,8 +19,8 @@ app.add_middleware(
 from functions import (
     create_upload_file,
 
-    head, 
-    tail, 
+    head,
+    tail,
     shape,
     dtype,
     columns,
