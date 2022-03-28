@@ -37,7 +37,8 @@ async def dtype(item: Request) -> tuple:
 
 @check_error
 async def columns(item: Request) -> tuple:
-    return True, f"{list(pd.read_json(await item.json()).columns)}"
+    cols = list(pd.read_json(await item.json()).columns)
+    return True, f"{cols}"
 
 
 # @check_error
