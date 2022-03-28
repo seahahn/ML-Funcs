@@ -56,6 +56,8 @@ def check_error(func):
         try:
             # 토큰을 검증하여 유효한 토큰인지 확인
             # JWT 토큰 인증되지 않으면 기능 작동 X (정상적인 사용자가 아닌 것으로 간주)
+            print(token)
+            print(type(token))
             at = token
             jwt.decode(at, SECRET_KEY, algorithms="HS256")
         except Exception as e:
