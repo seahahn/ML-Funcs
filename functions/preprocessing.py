@@ -102,7 +102,7 @@ async def train_test_split(
     # v_train_size = None    if v_train_size == "" else v_train_size
 
     item = await item.json()
-    print(item)
+
     X = pd.read_json(item["X"])
     y = pd.read_json(item["y"])
 

@@ -6,7 +6,7 @@ import pandas as pd
 async def create_upload_file(file: UploadFile):
     EXCEL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     CSV   = ["application/vnd.ms-excel", "text/csv"]
-    print(file.content_type)
+
     if file.content_type == EXCEL:
         df = pd.read_excel(await file.read())
 
@@ -32,11 +32,9 @@ async def create_upload_file(file: UploadFile):
 
     # 모딘
 
-    # print(type(await file.read()))
     # 파일 종료(시스템에 자원 반납)
     await file.close()
 
-    print(df.head())
     return df.to_json(orient="records") # 판다스의 to_json()과 완전 동일한 함수
 
 

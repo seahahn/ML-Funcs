@@ -393,7 +393,6 @@ async def col_condition(
             elif cond1 == "le"   : df = df[df[col] <  value1]
             elif cond1 == "le_eq": df = df[df[col] <= value1]
 
-        # print(df)
         return True, df.to_json(orient="records")
     else:
         return False, f"{col} is not in columns of DataFrame. It should be in {dfcols}"
@@ -492,7 +491,6 @@ async def loc(
     elif cols is None                 : df = df.loc[idx, col_from:col_to]
     else                              : df = df.loc[idx, cols]
 
-    # print(df)
     return True, df.to_json(orient="records")
 
 @check_error
@@ -578,5 +576,4 @@ async def iloc(
     elif cols is None                 : df = df.iloc[idx, col_from:col_to]
     else                              : df = df.iloc[idx, cols]
 
-    # print(df)
     return True, df.to_json(orient="records")
