@@ -5,12 +5,12 @@ import pandas as pd
 
 async def create_upload_file(file: UploadFile):
     EXCEL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    CSV   = "application/vnd.ms-excel"
-
+    CSV   = ["application/vnd.ms-excel", "text/csv"]
+    print(file.content_type)
     if file.content_type == EXCEL:
         df = pd.read_excel(await file.read())
 
-    elif file.content_type == CSV:
+    elif file.content_type in CSV:
         df = pd.read_csv(file.file)
 
 
