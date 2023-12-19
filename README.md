@@ -1,6 +1,6 @@
 # ❇️ AI Play ML-Funcs
 
-머신 러닝 관련 기능 중 모델 학습을 제외한 모든 기능을 위한 API 서버
+API server for all machine learning-related functions except model training.
 
 ## :one: Stack
 
@@ -13,74 +13,78 @@
 
 <br/>
 
-## :two: 배포 플랫폼 및 서버 주소
-- 플랫폼 : Heroku
-- 주소 : https://aiplay-mlfuncs.herokuapp.com/
+## :two: Deployment Platform and Server Address
+
+- Platform: Heroku
+- Address: [https://aiplay-mlfuncs.herokuapp.com/](https://aiplay-mlfuncs.herokuapp.com/)
 
 <br/>
 
-## :three: API 명세
-- DOCS : https://aiplay-mlfuncs.herokuapp.com/docs
+## :three: API Specification
+
+- DOCS: [https://aiplay-mlfuncs.herokuapp.com/docs](https://aiplay-mlfuncs.herokuapp.com/docs)
 
 <details>
-  <summary>펼쳐보기</summary>
-  
-  | Method                 | URL | Description                       |
-  | ---------------------- | -------------------------- | --------------------------------- |
-  | POST                   | /uploadfile | 데이터셋 업로드 및 JSON 변환 |
-  | POST                   | /dataframe/head | 데이터프레임의 처음 N개 행 출력 |
-  | POST                   | /dataframe/tail | 데이터프레임의 마지막 N개 행 출력 |
-  | POST                   | /dataframe/shape | 데이터프레임의 행, 열 갯수 출력 |
-  | POST                   | /dataframe/dtype | 데이터프레임의 컬럼별 타입 출력 |
-  | POST                   | /dataframe/columns | 데이터프레임의 컬럼 목록 출력 |
-  | POST                   | /dataframe/unique | 컬럼 내 고유값 목록 출력 |
-  | POST                   | /dataframe/isna | 데이터프레임의 결측치 확인 |
-  | POST                   | /dataframe/corr | 데이터프레임의 컬럼별 상관계수 확인 |
-  | POST                   | /dataframe/describe | 데이터프레임의 통계 수치 확인 |
-  | POST                   | /dataframe/col_condition | 수치 조건에 맞는 데이터 출력 |
-  | POST                   | /dataframe/loc | 인덱스 혹은 컬럼명 조건에 해당하는 데이터 출력 |
-  | POST                   | /dataframe/iloc | 인덱스 혹은 컬럼 순서값 조건에 해당하는 데이터 출력 |
-  | POST                   | /dataframe/transpose | 데이터프레임의 행/열 전환 |
-  | POST                   | /dataframe/groupby | 조건에 맞게 데이터 그룹으로 묶기 |
-  | POST                   | /dataframe/drop | 조건에 맞는 행 또는 열 제거 |
-  | POST                   | /dataframe/dropna | 데이터프레임 결측치 제거 |
-  | POST                   | /dataframe/rename | 데이터프레임 컬럼명 변경 |
-  | POST                   | /dataframe/sort_values | 조건에 맞춰 데이터프레임의 데이터 정렬 |
-  | POST                   | /dataframe/merge | 조건에 맞춰 2개의 데이터프레임 합치기 |
-  | POST                   | /dataframe/concat | 조건에 맞춰 2개의 데이터프레임 이어붙이기 |
-  | POST                   | /dataframe/set_column | 조건에 맞춰 새로운 컬럼 생성 |
-  | POST                   | /dataframe/feature_target_split | 특성 / 타겟 분리하기 |
-  | POST                   | /dataframe/train_test_split | 훈련 / 검증 / 테스트셋 분리하기 |
-  | POST                   | /plot/boxplot | 상자 수염 그림 시각화 |
-  | POST                   | /plot/histplot | 히스토그램 시각화 |
-  | POST                   | /plot/countplot | 빈도 그래프 시각화 |
-  | POST                   | /plot/scatterplot | 산점도 시각화 |
+  <summary>Expand</summary>
+
+| Method | URL                             | Description                                                           |
+| ------ | ------------------------------- | --------------------------------------------------------------------- |
+| POST   | /uploadfile                     | Upload dataset and convert to JSON                                    |
+| POST   | /dataframe/head                 | Display the first N rows of the DataFrame                             |
+| POST   | /dataframe/tail                 | Display the last N rows of the DataFrame                              |
+| POST   | /dataframe/shape                | Display the number of rows and columns of the DataFrame               |
+| POST   | /dataframe/dtype                | Display the type of each column in the DataFrame                      |
+| POST   | /dataframe/columns              | Display the list of columns in the DataFrame                          |
+| POST   | /dataframe/unique               | Display the list of unique values in a column                         |
+| POST   | /dataframe/isna                 | Check for missing values in the DataFrame                             |
+| POST   | /dataframe/corr                 | Display the correlation coefficients between columns in the DataFrame |
+| POST   | /dataframe/describe             | Display the statistical summary of the DataFrame                      |
+| POST   | /dataframe/col_condition        | Display data based on numerical conditions                            |
+| POST   | /dataframe/loc                  | Display data based on index or column name conditions                 |
+| POST   | /dataframe/iloc                 | Display data based on index or column order conditions                |
+| POST   | /dataframe/transpose            | Transpose rows and columns of the DataFrame                           |
+| POST   | /dataframe/groupby              | Group data according to specified conditions                          |
+| POST   | /dataframe/drop                 | Remove rows or columns based on specified conditions                  |
+| POST   | /dataframe/dropna               | Remove missing values from the DataFrame                              |
+| POST   | /dataframe/rename               | Rename columns in the DataFrame                                       |
+| POST   | /dataframe/sort_values          | Sort the DataFrame data according to specified conditions             |
+| POST   | /dataframe/merge                | Merge two DataFrames based on specified conditions                    |
+| POST   | /dataframe/concat               | Concatenate two DataFrames based on specified conditions              |
+| POST   | /dataframe/set_column           | Create a new column based on specified conditions                     |
+| POST   | /dataframe/feature_target_split | Separate features and target in the DataFrame                         |
+| POST   | /dataframe/train_test_split     | Split the dataset into training, validation, and test sets            |
+| POST   | /plot/boxplot                   | Visualize boxplots                                                    |
+| POST   | /plot/histplot                  | Visualize histograms                                                  |
+| POST   | /plot/countplot                 | Visualize frequency graphs                                            |
+| POST   | /plot/scatterplot               | Visualize scatter plots                                               |
+
 </details>
 
 <br/>
 
-## :four: 트러블 슈팅 기록
+## :four: Troubleshooting Records
 
-- https://github.com/AI-Play/ML-Funcs/discussions
+- [https://github.com/AI-Play/ML-Funcs/discussions](https://github.com/AI-Play/ML-Funcs/discussions)
 
 <br/>
 
-## :five: 개발 환경 준비 사항
+## :five: Development Environment Preparation
 
 <details>
-  <summary>펼쳐보기</summary>
-  
-  ```
-  # 필요한 패키지 설치
-  pip install -r requirements.txt
-  ```
+  <summary>Expand</summary>
 
-  ##### 실행
+```
+// Install required packages
+pip install -r requirements.txt
+```
 
-  ```
-  export MODIN_ENGINE=ray   # Modin will use Ray
-  export MODIN_ENGINE=dask  # Modin will use Dask
+##### Run
 
-  uvicorn main:app --reload
-  ```
+```
+export MODIN_ENGINE=ray   # Modin will use Ray
+export MODIN_ENGINE=dask  # Modin will use Dask
+
+uvicorn main:app --reload
+```
+
 </details>
