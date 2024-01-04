@@ -1,3 +1,6 @@
 __pycache__
 visulization/templates
-.env
+.env*
+
+/venv
+.DS_Store
