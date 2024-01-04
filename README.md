@@ -74,7 +74,15 @@ API server for all machine learning-related functions except model training.
   <summary>Expand</summary>
 
 ```
-// Install required packages
+// Create a new virtual environment
+// 1. Move to the directory which has python version we need to use
+// 2. Create a new virtual environment
+python -m venv /path/to/new/virtual/environment
+
+// 3. Activate the virtual environment
+source /path/to/new/virtual/environment/bin/activate
+
+// 4. Install required packages
 pip install -r requirements.txt
 ```
 
