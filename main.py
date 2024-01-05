@@ -7,7 +7,7 @@ origins = [
     "http://localhost:3000", # 포트 지정 안 하면 CORS 에러 발생
     "https://front-web-xi.vercel.app"
 ]
-origin_regex = "https://.*\.aiplay\.online"
+origin_regex = "https://.*\.aiplay\.app"
 
 app.add_middleware(
     CORSMiddleware,
