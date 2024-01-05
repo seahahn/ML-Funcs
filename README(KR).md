@@ -16,13 +16,13 @@
 ## :two: 배포 플랫폼 및 서버 주소
 
 - 플랫폼 : Heroku
-- 주소 : https://aiplay-mlfuncs.herokuapp.com/
+- 주소 : [https://ai-play-ml-funcs-f034a2155d2a.herokuapp.com/](https://ai-play-ml-funcs-f034a2155d2a.herokuapp.com/)
 
 <br/>
 
 ## :three: API 명세
 
-- DOCS : https://aiplay-mlfuncs.herokuapp.com/docs
+- DOCS : [https://ai-play-ml-funcs-f034a2155d2a.herokuapp.com/docs](https://ai-play-ml-funcs-f034a2155d2a.herokuapp.com/docs)
 
 <details>
   <summary>펼쳐보기</summary>

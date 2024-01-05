@@ -16,13 +16,13 @@ API server for all machine learning-related functions except model training.
 ## :two: Deployment Platform and Server Address
 
 - Platform: Heroku
-- Address: [https://aiplay-mlfuncs.herokuapp.com/](https://aiplay-mlfuncs.herokuapp.com/)
+- Address: [https://ai-play-ml-funcs-f034a2155d2a.herokuapp.com/](https://ai-play-ml-funcs-f034a2155d2a.herokuapp.com/)
 
 <br/>
 
 ## :three: API Specification
 
-- DOCS: [https://aiplay-mlfuncs.herokuapp.com/docs](https://aiplay-mlfuncs.herokuapp.com/docs)
+- DOCS: [https://ai-play-ml-funcs-f034a2155d2a.herokuapp.com/docs](https://ai-play-ml-funcs-f034a2155d2a.herokuapp.com/docs)
 
 <details>
   <summary>Expand</summary>
